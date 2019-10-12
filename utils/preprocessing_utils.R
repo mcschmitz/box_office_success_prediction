@@ -1,4 +1,4 @@
-library(docstring)
+require(docstring)
 
 forecast_date = function(date, forecast) {
   #' Function to calculcate the end date of the forecast
@@ -57,4 +57,3 @@ define_searchterms = function(term) {
   return(list("1_main_title" = main_title, "2_main_title_film" = main_title_film,
               "3_complete_title" = complete_title))
 }
-
