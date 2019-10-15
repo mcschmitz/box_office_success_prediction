@@ -1,4 +1,5 @@
 require(docstring)
+require(matrixStats)
 
 forecast_date = function(date, forecast) {
   #' Function to calculcate the end date of the forecast
@@ -93,4 +94,26 @@ select_gt_data = function(trends, enddates, terms) {
   colnames(data) = c("Filmtitel", paste0("Woche", 6:1),
                      paste0("Aggregation", 6:1))
   return(data)
+}
+
+
+calculate_median = function(trends, enddates, terms, frame = 52) {
+  #' Function to calculate the median of the Google Treds data before the forecasting time window
+  #' 
+  #' @param trends [data.frame]: Google Trends Data
+  #' @param enddates [POSIXt]: Enddates of the forecast horizon
+  #' @param terms [chracter]: movietitles
+  #' @param frame: [numeric]: timeframe that should be used to calculate the median
+  #' 
+  #' @return Median of the Google Trends data for each movie
+  
+  trends = as.matrix(trends[, -1])
+  data = matrix(nrow = nrow(trends), ncol = frame)
+  for(i in seq_along(terms)) {
+    end = which(as.character(enddates[i]) == colnames(trends)) - 6
+    start = end - (frame - 1)
+    data[i, ] = trends[i, start:end]
+  }
+  median = rowMedians(data)
+  return(median)
 }

@@ -585,18 +585,18 @@ gt_schleswigernachrichten_scaled = scale_down(upper_gt = gt_fraenkischenachricht
                                               lower_gt = gt_schleswigernachrichten,
                                               scale_gt = gt_hamburg_schleswigernachrichten)
 
-gt_Daten_complete_title = gt_schleswigernachrichten_scaled
-gt_Daten_complete_title = as.data.frame(t(gt_Daten_complete_title[,4:ncol(gt_Daten_complete_title)]))
-rownames(gt_Daten_complete_title) = 1:nrow(gt_Daten_complete_title)
-gt_Daten_complete_title = cbind(movies$Filmtitel[which(complete_title != main_title)], gt_Daten_complete_title)
-rownames(gt_Daten_complete_title) = 1:nrow(gt_Daten_complete_title)
+gt_data_complete_title = gt_schleswigernachrichten_scaled
+gt_data_complete_title = as.data.frame(t(gt_data_complete_title[,4:ncol(gt_data_complete_title)]))
+rownames(gt_data_complete_title) = 1:nrow(gt_data_complete_title)
+gt_data_complete_title = cbind(movies$Filmtitel[which(complete_title != main_title)], gt_data_complete_title)
+rownames(gt_data_complete_title) = 1:nrow(gt_data_complete_title)
 load("data/gt-data_anker/gt-data_anker_main_title.RData")
-colnames(gt_Daten_complete_title) = colnames(gt_data_main_title)
-gt_Daten_complete_title = rbind(gt_data_main_title[which(complete_title == main_title), ],
-                                gt_Daten_complete_title)
-gt_Daten_complete_title = gt_Daten_complete_title[order(match(gt_Daten_complete_title[, 1], movies$Filmtitel)), ]
-rownames(gt_Daten_complete_title) = 1:nrow(gt_Daten_complete_title)
-rm(list = ls() [which(ls() != "gt_Daten_complete_title")])
+colnames(gt_data_complete_title) = colnames(gt_data_main_title)
+gt_data_complete_title = rbind(gt_data_main_title[which(complete_title == main_title), ],
+                                gt_data_complete_title)
+gt_data_complete_title = gt_data_complete_title[order(match(gt_data_complete_title[, 1], movies$Filmtitel)), ]
+rownames(gt_data_complete_title) = 1:nrow(gt_data_complete_title)
+rm(list = ls() [which(ls() != "gt_data_complete_title")])
 save.image("data/gt-data_anker/gt-data_anker_complete_title.RData")
 
 
