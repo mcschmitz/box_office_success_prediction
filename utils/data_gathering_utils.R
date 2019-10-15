@@ -46,7 +46,7 @@ exportGT = function(terms, startdates, enddates = NULL, geo = "DE", anker, ...) 
     current_terms = c(anker, terms_list[[i]])
     Sys.sleep(0.2)
     time_frame = paste(startdates_lower, enddates_upper)
-    gt_output = try(gtrends(current_terms, time = time_frame, onlyInterest = TRUE), silent = TRUE)
+    gt_output = try(gtrends(current_terms, time = time_frame, onlyInterest = TRUE, geo=geo), silent = TRUE)
     gt_output = gt_output$interest_over_time
     Sys.sleep(0.2)
     closeAllConnections()
@@ -64,7 +64,8 @@ exportGT = function(terms, startdates, enddates = NULL, geo = "DE", anker, ...) 
       gt_casted = dcast(data = gt_output,formula = id ~ keyword, fun.aggregate = sum,value.var = "hits")
       
       gt_casted$start = gt_output$date[1:weeks]
-      gt_casted$end = c(gt_output$date[2:weeks], tail(gt_output$date, 1) + 7*3600*24)
+      gt_casted$end = c(gt_output$date[2:weeks], tail(gt_output$date, 1) + as.difftime(tim = 7, units = "days"))
+      gt_casted$end = as.Date(gt_casted$end, format="%Y-%m%-%d", tz="GMT")
       gt_casted = gt_casted[, c("start", "end", current_terms_output)]
       colnames(gt_casted) = c("start", "end", current_terms)
       trends[[i]] = cbind(gt_casted[, 1:2], gt_casted[, 3:ncol(gt_casted)] / gt_casted[, 3])
@@ -84,12 +85,10 @@ exportGT = function(terms, startdates, enddates = NULL, geo = "DE", anker, ...) 
     if (i %% 25 == 0){
       options(HTTPUserAgent = paste(paste(LETTERS[round(runif(3, 1, 24))], sep = "", collapse = ""), 
                                     "(3.2.3 x86_64-w64-mingw32 x86_64 mingw32)"))
-      cat("changing UserAgent to", getOption("HTTPUserAgent"))
     }
   }
   options(HTTPUserAgent = paste(paste(LETTERS[round(runif(3, 1, 24))], sep = "", collapse = ""), 
                                 "(3.2.3 x86_64-w64-mingw32 x86_64 mingw32)"))
-  cat("changing UserAgent to", getOption("HTTPUserAgent"))
   
   trends = do.call(cbind, trends)
   return(trends)

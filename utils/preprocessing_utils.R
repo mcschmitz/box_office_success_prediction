@@ -10,11 +10,11 @@ forecast_date = function(date, forecast) {
   #' @return [POSIXct] enddate of the forecast. Always a saturday
   
   if(strftime(x = date, format = "%a", usetz = FALSE) == "Mi") {
-    date = date - as.difftime(tim = 4 + (forecast - 1) * 7, units = "days")
+    date = date - as.difftime(tim = 3 + (forecast - 1) * 7, units = "days")
   }
   
   if(strftime(x = date, format = "%a", usetz = FALSE) == "Do") {
-    date = date - as.difftime(tim = 5 + (forecast - 1) * 7, units = "days")
+    date = date - as.difftime(tim = 4 + (forecast - 1) * 7, units = "days")
   }
   return(date)
 }
