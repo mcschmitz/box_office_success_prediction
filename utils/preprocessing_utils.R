@@ -57,3 +57,40 @@ define_searchterms = function(term) {
   return(list("1_main_title" = main_title, "2_main_title_film" = main_title_film,
               "3_complete_title" = complete_title))
 }
+
+select_gt_data = function(trends, enddates, terms) {
+  #' Function to extract the required weeks of data out of the Google Trends dataset
+  #' 
+  #' @param trends [data.frame]: Google Trends dataset
+  #' @param enddates [Date]: Vector containting enddates of the forecast for the movies
+  #' @param terms [character]: Movietitles
+  #' 
+  #' @return [data.frame]: data.frame containing 13 columns:
+  #' - Spalte mit Filmtitel
+  #' - 6 Spalten mit wöchentlichen Google-Daten
+  #' - 6 Spalten mit aggregierten Google-Daten
+  
+  trends = as.matrix(trends[, -1])
+  data = matrix(nrow = nrow(trends), ncol = 6)
+  data_aggregated = matrix(nrow = nrow(trends), ncol = 6)
+  for(i in seq_along(terms)) {
+    end = which(as.character(enddates[i]) == colnames(trends))
+    start = end - 5
+    data[i, ] = trends[i, start:end]
+  }
+  # Set negative Google Values to zero
+  data = apply(X = data, MARGIN = 2, FUN = function(x) {
+    ifelse(test = x < 0, yes = 0, no = x)
+  })
+  data_aggregated[, 1] = data[, 1]
+  for(j in 2:6) {
+    data_aggregated[, j] = rowSums(data[, 1 : j])
+  }
+  # Prepare return value
+  data = as.data.frame(data)
+  data_aggregated = as.data.frame(data_aggregated)
+  data = cbind(terms, data, data_aggregated)
+  colnames(data) = c("Filmtitel", paste0("Woche", 6:1),
+                     paste0("Aggregation", 6:1))
+  return(data)
+}
