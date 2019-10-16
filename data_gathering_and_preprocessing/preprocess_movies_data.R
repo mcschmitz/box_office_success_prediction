@@ -48,7 +48,7 @@ movies$Filmtitel[c(67, 95, 151, 236, 559, 608, 621, 826, 836, 846)] =
 movies$Filmtitel[c(84, 97, 280, 286, 293, 486, 506, 727, 771, 894)] = 
   gsub(movies$Filmtitel[c(84, 97, 280, 286, 293, 486, 506, 727, 771, 894)], pattern = "&", replacement = "und")
 
-# Correct "Tschiller: Off Duty" and "Dessau Dancers":
+# Correct some movvie titles:
 movies$Filmtitel[788] = "Tschiller: Off Duty"
 movies$Filmtitel[572] = "Dessau Dancers"
 

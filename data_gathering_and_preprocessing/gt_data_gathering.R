@@ -606,5 +606,6 @@ load("data/gt-data_anker/gt-data_anker_main_title_film.RData")
 load("data/gt-data_anker/gt-data_anker_complete_title.RData")
 gt_kino = gtrends(keyword = "Kino", geo = "DE", 
                   time = paste(as.character(trunc(startdates_median[1], "months")),
-                               as.character(ceil(enddates[898], "months"))), onlyInterest = TRUE)
+                               as.character(ceil(enddates[898], "months"))), onlyInterest = TRUE)$interest_over_time
+gt_kino$date = as.character(gt_kino$date)
 save.image("data/gt-data_anker/gt-data_anker_final.RData")

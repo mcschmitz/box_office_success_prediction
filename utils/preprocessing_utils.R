@@ -1,5 +1,6 @@
 require(docstring)
 require(matrixStats)
+require(geoR)
 
 forecast_date = function(date, forecast) {
   #' Function to calculcate the end date of the forecast
@@ -48,13 +49,10 @@ define_searchterms = function(term) {
   complete_title = gsub(pattern = "\\?", replacement = "", x = complete_title)
   complete_title = gsub(pattern = "\\,", replacement = "", x = complete_title)
 
-  complete_title = gsub(pattern = "\\(3D\\)", replacement = "",
-                        x = complete_title)
+  complete_title = gsub(pattern = "\\(3D\\)", replacement = "", x = complete_title)
   complete_title = gsub(pattern = "3D", replacement = "", x = complete_title)
-  complete_title = gsub(pattern = "\\.\\.\\.", replacement = "",
-                        x = complete_title)
-  complete_title = gsub(pattern = "\\.\\.", replacement = "",
-                        x = complete_title)
+  complete_title = gsub(pattern = "\\.\\.\\.", replacement = "", x = complete_title)
+  complete_title = gsub(pattern = "\\.\\.", replacement = "", x = complete_title)
   return(list("1_main_title" = main_title, "2_main_title_film" = main_title_film,
               "3_complete_title" = complete_title))
 }
@@ -91,8 +89,7 @@ select_gt_data = function(trends, enddates, terms) {
   data = as.data.frame(data)
   data_aggregated = as.data.frame(data_aggregated)
   data = cbind(terms, data, data_aggregated)
-  colnames(data) = c("Filmtitel", paste0("Woche", 6:1),
-                     paste0("Aggregation", 6:1))
+  colnames(data) = c("Filmtitel", paste0("Woche", 6:1), paste0("Aggregation", 6:1))
   return(data)
 }
 
@@ -117,3 +114,69 @@ calculate_median = function(trends, enddates, terms, frame = 52) {
   median = rowMedians(data)
   return(median)
 }
+
+calculate_google_value = function(data, weights) {
+  #' Function to calculate the Google Value
+  #' 
+  #' @param data [data.frame]: Google Trends data
+  #' @param weights [numeric]: Weights to calculate the Google Value
+  #' 
+  #' @return google_value [numeric]: Google-Values
+  
+  google_values = matrix(data = NA, nrow = nrow(data), ncol = 12)
+
+    for(i in 1:6) {
+    columns = head(grep(pattern = paste0("Woche", i), x = colnames(data)), 3)
+    data_sub = data[, columns]
+    weights_sub = weights[, 7 - i]
+    google_values[, 7 - i] = weights_sub[1] * data_sub[, 1] + 
+      (1 - weights_sub[1]) * data_sub[, 3]
+    for(j in 1:nrow(data_sub)) {
+      # If the title has a subtitle add an additional linear combination based first linear combination and the main 
+      # title
+      if(data_sub[j, 1] != data_sub[j, 2]) {
+        google_values[j, 7 - i] = weights_sub[2] * google_values[j, 7 - i] + (1 - weights_sub[2]) * data_sub[j, 2]
+      }
+    }
+  }
+
+    for(i in 1:6) {
+    columns = head(grep(pattern = paste0("Aggregation", i),
+                        x = colnames(data)), 3)
+    data_sub = data[, columns]
+    weights_sub = weights[, 13 - i]
+    # Linear comination of main title and main title + film
+    google_values[, 13 - i] = weights_sub[1] * data_sub[, 1] + 
+      (1 - weights_sub[1]) * data_sub[, 3]
+    for(j in 1:nrow(data_sub)) {
+      if(data_sub[j, 1] != data_sub[j, 2]) {
+        google_values[j, 13 - i] = weights_sub[2] * google_values[j, 13 - i] + (1 - weights_sub[2]) * data_sub[j, 2]
+      }
+    }
+  }  
+  google_values = as.data.frame(google_values)
+  colnames(google_values) = c(paste0("Woche", 6:1), paste0("Aggregation", 6:1))
+  return(google_values)
+}
+
+estimate_box_cox = function(vector) {
+  #' Apply Box-Cox Transformation
+  #' 
+  #' @param [numeric] Input data
+  #' 
+  #' @return [list] google_value [numeric]: tranformed input, lambda [numeric]: estimated Lambda
+  
+  lambda = boxcoxfit(object = vector, lambda2 = TRUE,
+                     method = "L-BFGS-B")$lambda
+  
+  if(is.null(lambda[1])) {
+    vector = log(vector + lambda[2])
+  }
+  else {
+    vector = ((vector + lambda[2]) ^ lambda[1] - 1) / lambda[1]
+  }
+  return(list("google_value" = vector, "lambda" = lambda))
+}
+
+
+
