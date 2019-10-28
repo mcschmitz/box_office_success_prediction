@@ -1,10 +1,9 @@
-Feature Analyis
+Target Analyis
 ================
 
 ***This notebook mainly shows the distribution of the target feature and
-the relation between the target and the most critical features***
-
-Load the required packages and the dataset
+tests for different distributions if the target feature follows this
+distributions***
 
 ``` r
 require(MASS)
@@ -23,7 +22,7 @@ lines(x = grid, y = dnorm(x = grid, mean = mean(data_final$Besucher_wochenende1)
 legend("topright", legend = c("KDE", "Normaldistribution"), col = (c("black", "red3")), lty = 1)
 ```
 
-![](feature_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](target_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 The target obviously isn’t normal distributed. Whereas, the logarithmic
 target seems to follow a normal distributionquite well.
@@ -38,7 +37,7 @@ lines(x = grid, y = dnorm(x = grid, mean = mean(data_final$Besucher_wochenende1_
 legend("topright", legend = c("KDE", "Normaldistribution"), col = (c("black", "red3")), lty = 1)
 ```
 
-![](feature_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](target_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 The following tests check for normal distribution of the untransformed
 target:
@@ -159,7 +158,7 @@ lines(x = grid, y = dgamma(x = grid, shape = shape, scale = scale), col = "red3"
 legend("topright", legend = c("KDE", "Gamma Distribution"), col = (c("black", "red3")), lty = 1)
 ```
 
-![](feature_analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](target_analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 Applying the three tests results in the following ouputs:
 
@@ -225,13 +224,13 @@ Therefore, for all further descriptive analysis the logarithmic target
 feature will be used.
 
 ``` r
-# Boxlpots
+# Boxpots
 par(mfrow = c(1, 2))
 boxplot(x = data_final$Besucher_wochenende1, ylab = "Visitors on the first weekend")
 boxplot(x = data_final$Besucher_wochenende1_log, ylab = "log(Visitors on the first weekend)")
 ```
 
-![](feature_analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](target_analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(1, 1))
@@ -251,63 +250,10 @@ plot(tmp$Visitors_log ~ tmp$Date, type = "l", xaxt = "n", ylab =  "log(Visitors 
 axis.Date(side = 1, at = tmp$Date, format = "%m-%Y")
 ```
 
-![](feature_analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](target_analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 The developement of the target over time clearly shows a seasonal trend
 with peaks in winter and drops in spring and summer. The final drop on
 summer of 2016 is due to the fact that the dataset does not contain as
 much movies for July 2016 as it does for the other months and therefore
 the monthly mean of July 2016 is more sensitive to outliers.
-
-``` r
-plot(x = data_final$Kopien, y = data_final$Besucher_wochenende1_log,
-     main = "Relation between number off copies and visistors on the first weekend", xlab = "#Copies", 
-     ylab = "log(Visitors on the first weekend)")
-```
-
-![](feature_analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
-
-The upper plot shows a clear relation between number of copies and the
-target feature. Obviously, this relation is not linear which should be
-taken into account if one includes this feature into her model.
-
-``` r
-plot(x = data_final$Kinderfilm, y = data_final$Besucher_wochenende1_log,
-     main = "Relation between the movie beeing a kids movie and visistors", 
-     ylab = "log(Visitors on the first weekend)", xlab = "Kids Movie",  names = c("Yes", "No"))
-```
-
-![](feature_analysis_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
-
-Also there seems to be a relation between the movie beeing a Kids Movie
-or not. Whereby, Kids Movies usually attract less visitors that Non Kids
-Movies.
-
-``` r
-par(mar = c(5, 10, 4, 2))
-plot(x = data_final$Genre_Prognose, y = data_final$Besucher_wochenende1_log, horizontal=TRUE, las=2,
-     main = "Relation between genre and visistors", xlab = "log(Visitors on the first weekend)", ylab = "")
-```
-
-![](feature_analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
-
-If one takes a look at the relation between the visitors of a movie an
-its genre two points are highly remarkable: Thrillers and especially
-Drama and Arthouse movies seem to attract much less visitors than the
-other movie genres. On the other hand Action/Adventure movies and CGI
-movies seem to attract much more than the average movie. The remaining
-genres seem to attract an average number ob people with almost no
-outliers in the tranformed target.
-
-The plot below shows the relation between the category of the stuio and
-the target feature. Unsurprisingly bigger studios tent to release movies
-which attract a greater amount of visitors than the smaller independent
-studios.
-
-``` r
-plot(x = data_final$Verleiherkategorie, y = data_final$Besucher_wochenende1_log,
-     main = "Relation between studio category and visistors",
-     ylab = "log(Visitors on the first weekend)", xlab = "Studio category")
-```
-
-![](feature_analysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->

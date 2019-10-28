@@ -1,0 +1,65 @@
+Movie Feature Analyis
+================
+
+***This notebook mainly shows the relation between the target and the
+most critical features of a movie***
+
+``` r
+require(MASS)
+require(goftest)
+
+load("../data/data_final/data_final.RData")
+```
+
+``` r
+plot(x = data_final$Kopien, y = data_final$Besucher_wochenende1_log,
+     main = "Relation between number off copies and visistors on the first weekend", xlab = "#Copies", 
+     ylab = "log(Visitors on the first weekend)")
+```
+
+![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+The upper plot shows a clear relation between number of copies and the
+target feature. Obviously, this relation is not linear which should be
+taken into account if one includes this feature into her model.
+
+``` r
+plot(x = data_final$Kinderfilm, y = data_final$Besucher_wochenende1_log,
+     main = "Relation between the movie beeing a kids movie and visistors", 
+     ylab = "log(Visitors on the first weekend)", xlab = "Kids Movie",  names = c("Yes", "No"))
+```
+
+![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+Also there seems to be a relation between the movie beeing a Kids Movie
+or not. Whereby, Kids Movies usually attract less visitors that Non Kids
+Movies.
+
+``` r
+par(mar = c(5, 10, 4, 2))
+plot(x = data_final$Genre_Prognose, y = data_final$Besucher_wochenende1_log, horizontal=TRUE, las=2,
+     main = "Relation between genre and visistors", xlab = "log(Visitors on the first weekend)", ylab = "")
+```
+
+![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+If one takes a look at the relation between the visitors of a movie an
+its genre two points are highly remarkable: Thrillers and especially
+Drama and Arthouse movies seem to attract much less visitors than the
+other movie genres. On the other hand Action/Adventure movies and CGI
+movies seem to attract much more than the average movie. The remaining
+genres seem to attract an average number ob people with almost no
+outliers in the tranformed target.
+
+The plot below shows the relation between the category of the stuio and
+the target feature. Unsurprisingly bigger studios tent to release movies
+which attract a greater amount of visitors than the smaller independent
+studios.
+
+``` r
+plot(x = data_final$Verleiherkategorie, y = data_final$Besucher_wochenende1_log,
+     main = "Relation between studio category and visistors",
+     ylab = "log(Visitors on the first weekend)", xlab = "Studio category")
+```
+
+![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
