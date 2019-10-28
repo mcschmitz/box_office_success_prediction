@@ -19,6 +19,16 @@ lines(x = grid, y = dnorm(x = grid, mean = mean(data_final$Besucher_wochenende1_
                           sd = sd(data_final$Besucher_wochenende1_log)), col = "red3", lwd = 2)
 legend("topright", legend = c("KDE", "Normaldistribution"), col = (c("black", "red3")), lty = 1)
 
+shape = mean(data_final$Besucher_wochenende1) ^ 2 / var(data_final$Besucher_wochenende1)
+scale = var(data_final$Besucher_wochenende1) / mean(data_final$Besucher_wochenende1)
+truehist(data = data_final$Besucher_wochenende1, col = "grey95", ylim = c(0, 0.00001), ylab = "Density",
+         xlab = "Visitors on the first weekend")
+lines(x = density(data_final$Besucher_wochenende1), col = "black", lwd = 2)
+grid = seq(from = 0, to = max(data_final$Besucher_wochenende1) + 1, by = 0.1)
+y = dgamma(x = grid, shape = shape, scale = scale)
+lines(x = grid, y = y, col = "red3", lwd = 2)
+legend("topright", legend = c("KDE", "Gamma Distribution"), col = (c("black", "red3")), lty = 1)
+
 # Check for normal distribution
 fit_normal = fitdistr(x = data_final$Besucher_wochenende1, densfun = "normal")
 # Kolmogorov-Smirnov-Test:
