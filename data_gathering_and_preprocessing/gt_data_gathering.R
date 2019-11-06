@@ -1,4 +1,3 @@
-# Zugriff auf benötigte Programme und Workspaces:
 source("utils/data_gathering_utils.R")
 load("data/movies_preprocessed.RData")
 
