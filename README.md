@@ -23,6 +23,6 @@ To get a single KPI that captures the people's interest in a movie a linear comb
 
 The following plot shows the Google Trend data for five famous franchises over time.
 
-![alt text](readme_plots/trends_exampple.png) 
+![alt text](readme_plots/trends_example.png) 
 
 The plot not only shows the problems mentioned above but also another crucial circummstance that often arises when searching for famous franchises: Since these movies are so popular they tend to have a high search volume eeven in times no new movie of the franchies is about to premiere.
