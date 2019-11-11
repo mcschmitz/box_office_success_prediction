@@ -25,4 +25,4 @@ The following plot shows the Google Trend data for five famous franchises over t
 
 ![alt text](readme_plots/trends_example.png) 
 
-The plot not only shows the problems mentioned above but also another crucial circummstance that often arises when searching for famous franchises: Since these movies are so popular they tend to have a high search volume eeven in times no new movie of the franchies is about to premiere.
+The plot not only shows the problems mentioned above but also another crucial circummstance that often arises when searching for famous franchises: Since these movies are so popular they tend to have a high search volume even in times no new movie of the franchies is about to premiere. Nevertheless, we are only interested in the search volume generated through the premiere of the new movie, and not the general interest in the movie franchise itself.
