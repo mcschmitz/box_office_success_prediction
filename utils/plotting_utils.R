@@ -29,12 +29,9 @@ thousand_dot = function(x) {
 
 number_ticks = function(n) {function(limits) pretty(limits, n)}
 
-stat_con <- theme_classic() + 
-  theme(text = element_text(size = 12), axis.title = element_text(size = 12),
-        axis.text = element_text(size = 12),
-        legend.text = element_text(size = 12),
-        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-        strip.text.y = element_text(size = 12), legend.text.align = 0,
-        strip.placement = "outside",  strip.background = element_blank(),
-        axis.title.y = element_text(margin = margin(0, 10, 0, 0)),
+stat_con = theme_classic() + 
+  theme(text = element_text(size = 12), axis.title = element_text(size = 12), axis.text = element_text(size = 12),
+        legend.text = element_text(size = 12), plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        strip.text.y = element_text(size = 12), legend.text.align = 0, strip.placement = "outside", 
+        strip.background = element_blank(), axis.title.y = element_text(margin = margin(0, 10, 0, 0)),
         axis.title.x = element_text(margin = margin(10, 0, 0, 0)))

@@ -11,7 +11,7 @@ for (horizon in 1:6){
   values = optim_weights(data = data_sub, n_outer = 3, n_inner = 10, reps_inner = 5)
   assign(paste0("weights", horizon), values)
   gc()
-  save.image("best_weights.Rdata")
+  save.image("results/parameters/weights.Rdata")
 }
 
 # Calculate weights for aggregated data
@@ -25,7 +25,7 @@ for (horizon in 1:6){
   values = optim_weights(data = data_sub, n_outer = 3, n_inner = 10, reps_inner = 5)
   assign(paste0("weights_agg",horizon), values)
   gc()
-  save.image("best_weights.Rdata")
+  save.image("results/parameters/weights.Rdata")
 }
 
 # Take weekly mean of the weights to get the final parameters for each linear comination
@@ -48,4 +48,4 @@ remove(weights1, weights2, weights3, weights4, weights5, weights6, weights_agg1,
        optim_weights, data_final, data_sub, lambda, current_weights, horizon, values, columns, calculate_google_value,
        calculate_median, define_searchterms, forecast_date, select_gt_data)
 
-save.image("data/parameters/weights.Rdata")
+save.image("results/parameters/weights.Rdata")
