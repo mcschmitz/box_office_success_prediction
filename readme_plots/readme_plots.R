@@ -12,6 +12,6 @@ plot = ggplot(aes(y = Volume, x = Date, color = SearchTerm, group = SearchTerm),
   scale_x_datetime(breaks = dates, labels = strftime(dates, format = "%m/%y")) + stat_con + 
   scale_color_hue(h.start = 270) + theme(legend.position = c(0.2, 0.7), legend.title = element_blank())
 par(bg = "white")
-png("readme_plots/Trends_Beispiel.png", width = 1200, height = 400, res = 120)
+png("readme_plots/trends_example", width = 1200, height = 400, res = 120)
 plot
 dev.off()
