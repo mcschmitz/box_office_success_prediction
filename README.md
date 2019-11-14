@@ -16,8 +16,8 @@ The provided dataset contains key data for 900 movies that premiered in Germany 
 
 Capturing the popularity of a movie on Google Search is a hard task mainly due to 2 facts. First, movie titles are not always nonambiguous meaning that a search for *Django Unchained* will almost certainly lead you to a result linked to the Tarantino movie, whereas, a search for a Biopic like *Hitchcock* might result in a Webpage about the director itself. Second, the search volume information of a search term on Google is not publicly available in an evaluable form, meaning that Google Trends (which will serve as the main data source) only offfers natural numbers whereby, the maximum value in the observed time window is scaled to 100, which makes it impossible to compare a movie like *Star Wars - The force awakens* to an independent movie like *Flores Raras*, because the volume for *Flores Raras* will mostly if not always be scaled to 0. Therefore, the main task in gathering the search request data and calculating the popularity KPIs was two-sided:
 
-1. Making sure, that the provided requests refer to the movie and nothing but the movie
-2. Getting comparable real valued data for all movies from arthouse movies to blockbusters
+1.) Making sure, that the provided requests refer to the movie and nothing but the movie
+2.) Getting comparable real valued data for all movies from arthouse movies to blockbusters
 
 To get a single KPI that captures the people's interest in a movie a linear combination of 3 possible search terms is defined. These search terms are the main title of the movie (e.g. *The Hobbit*), the main title of the movie + the suffix *film* (german for *movie*) and the complete title (e.g. *The Hobbit: An unexpected Journey*). The Google Trends data is gathered using the Pseudo API of [``gtrendsR``](https://cran.r-project.org/web/packages/gtrendsR/index.html), whereby, 5 search terms can be drawn at the same query. According to this [medium article](https://medium.com/google-news-lab/what-is-google-trends-data-and-what-does-it-mean-b48f07342ee8#.3efc7z5l9) the following transformations are applied for search term in a query: The absolute search volume at each time for the search term is devided by the overall(!) search volume for the given time. After this the data is normalized to a natural number range from 0 to 100 whereby, the relative maximum value of the five transformed query results is scaled to 100. This results in uncompareable numbers which makes a prediction unfeasible.
 
@@ -29,11 +29,11 @@ The plot not only shows the problems mentioned above but also another crucial ci
 
 To counteract the difficulties above the construction of a so called *Google Value*, which should server as our KPI mentioned above, is necessary. To construct this Google Value 3 main steps are necessary:
 
-1. Define a list of anchor terms to link search terms of differend volume levels
-2. Normalize the search volume for each search term by substracting the median of the search volume within the time period before prediction
-3. Build the Google Value as linear combination of the 3 search terms (main title, main title + film, complete title)
+1.) Define a list of anchor terms to link search terms of differend volume levels and scale the search volume of the search terms according to these levels
+2.) Normalize the search volume for each search term by substracting the median of the past 52 weeks before the forecast period of that specific search term
+3.) Build the Google Value as linear combination of the 3 search terms (main title, main title + film, complete title)
 
-For step 1. it is mandatory to define a list of anchor terms whose search volume is as constant as possible over time to prevent disturbed standarization of the search terms. A good choice for such terms are cities or news papers. starting from bigger citiesand continuing to lokal newspapers. The first anchor is standardized by its own median to get the first *Scaling Factor*:
+For step 1.) it is mandatory to define a list of anchor terms whose search volume is as constant as possible over time to prevent disturbed standarization of the search terms. A good choice for such terms are cities or news papers. starting from bigger citiesand continuing to lokal newspapers. The first anchor is standardized by its own median to get the first *Scaling Factor*:
 
 <img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_1&space;=&space;\frac{anchor^1}{med(anchor^1)}." title="SF_1 = \frac{anchor^1}{med(anchor^1)}." />
 
@@ -43,9 +43,22 @@ To linke each search term to the median of the first anchor it is necessary to l
 
 To make movies like *Star Wars - the force awakens* and *Flores Raras* comparable the search terms are drawn and linked to the anchor words top down. So in a first step the search terms are drawn with first anchor and scaled with its Scaling Factor. If maximum scaled seach volume of a search term within the time window of interest is below  0.25 it has to be redrawn with the next lower anchor term.
 
-The result of the linked anchor terms are depicted below, whereby the right plot is just a zoom in on low level anchor terms:
+The scaled search volume is now <img src="https://latex.codecogs.com/svg.latex?\inline&space;x_{scaled}=x_i&space;\cdot&space;SF_i" title="x_{scaled}=x_i \cdot SF_i" /> where <img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_i" title="SF_i" /> is the Scaling Factor of the anchor term which produced results of the search term that were great enough (> 0.25).
+
+The result of the linked anchor terms (and so the Scaling Factors) are depicted below, whereby the right plot is just a zoom in on low level anchor terms:
 
 ![alt-text](readme_plots/anchors.png)
 
-It can be easily seen, that the scaled anchor terms are much more accurate than the unscaled ones and enable us to compare searcht terms of block busters to ones of smaller independent movies.
+Especially in the right plot it can be seen, that the scaled anchor terms are much more accurate than the unscaled ones and enable us to compare searcht terms of block busters to ones of smaller independent movies.
 
+To capture the impact of a movie premiere for ambigiuous movie titles the scaled search volume will be normalized according to 2.). The following plot clearifies why this is necessary.
+
+![alt-text](readme_plots/median_normalization.png)
+
+While the left plot shows the seach volume for the quite amiguous movie title [*Mama*](https://en.wikipedia.org/wiki/Mama_(2013_film)), the right one shows the seach vole for the term [*Fack Ju Göhte*](https://en.wikipedia.org/wiki/Fack_ju_G%C3%B6hte). Taking a look at the seach volume of *Mama* it appears, that the requests for this seach term do not really increase during the forecast period, but the days after it and normalize after the premiere. One the other hand the search volume for *Fack Ju Göhte*, which was unexpected succesfull and produced two more successors, is not decreasing to the level before the premiere.These two examples show why substracting the median of the search volume *before* the forecast period is necessary. Google trends data gathering and the following steps 1.) and 2.) are done in [this script](data_gathering_and_preprocessing/gt_data_gathering.R)
+
+After substracting the median for each seach term we need to melt the 3 search terms for each movie to a single KPI (Google Value *gv*) by applying a linear transformation. To do so we'll melt the search volumina of the main title (*mt*) and main title + "film" (*mtf*) to a single value. If the movie has a subtitle we'll take the search volume of the complete title (*ct*) into consideration in a second step. The resulting linear combination should maximize the correlation between the Google Value and the amount of visitors:
+
+<img src="https://latex.codecogs.com/svg.latex?\inline&space;\underset{a,&space;b}{maximize}&space;f(gv_{j})&space;=&space;\rho(gv_{j},&space;visitors)&space;\\&space;with&space;\hspace{0.5cm}&space;gv_{j}&space;=&space;\begin{cases}&space;a_j&space;\cdot&space;mt_{ij}&space;&plus;&space;(1&space;-&space;a_j)&space;\cdot&space;mtf_{ij}&space;&&space;\text{for&space;}&space;mt&space;=&space;ct.&space;\\&space;b_j&space;\cdot&space;\Big{(}a_j&space;\cdot&space;mt_{ij}&space;&plus;&space;(1&space;-&space;a_j)&space;\cdot&space;mtf_{ij}\Big{)}&space;&plus;&space;(1&space;-&space;b_j)&space;\cdot&space;ct_{ij}&space;&&space;\text{for&space;}&space;ct&space;\neq&space;kt.&space;\end{cases}&space;\\&space;\\&space;w.r.t&space;\hspace{0.5&space;cm}&space;0&space;<&space;a_j&space;<&space;1&space;\hspace{0.5&space;cm}&space;and&space;\hspace{0.5&space;cm}&space;0&space;<&space;b_j&space;<&space;1" title="\underset{a, b}{maximize} f(gv_{j}) = \rho(gv_{j}, visitors) \\ with \hspace{0.5cm} gv_{j} = \begin{cases} a_j \cdot mt_{ij} + (1 - a_j) \cdot mtf_{ij} & \text{for } mt = ct. \\ b_j \cdot \Big{(}a_j \cdot mt_{ij} + (1 - a_j) \cdot mtf_{ij}\Big{)} + (1 - b_j) \cdot ct_{ij} & \text{for } ct \neq kt. \end{cases} \\ \\ w.r.t \hspace{0.5 cm} 0 < a_j < 1 \hspace{0.5 cm} and \hspace{0.5 cm} 0 < b_j < 1" />
+
+We'll do this for each week <img src="https://latex.codecogs.com/svg.latex?\inline&space;j" title="j" />. To prevent overfitting of the weights a nested resampling approach is applied and the resulting weights are averaged. To prevent values of 0, the Google Value will be [Box-Cox transformed](https://en.wikipedia.org/wiki/Power_transform#Box%E2%80%93Cox_transformation) afterwards. Calculation of the weights for the Google Value is done in [this script](data_gathering_and_preprocessing/calculate_gv_weights.R). In  [this script](data_gathering_and_preprocessing/calculate_gv_weights.R) the weights are applied and the Google Value is Box-Cox tranformed.

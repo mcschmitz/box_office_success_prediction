@@ -1,6 +1,7 @@
 require(gtrendsR)
 source("utils/plotting_utils.R")
 load("data/ankers.RData")
+load("data/data_final/data_final.RData")
 
 # Google Trends example output
 gdata = gtrends(keyword = c("Star Wars", "The Hobbit", "Hangover", "The Hunger Games", "James Bond"),
@@ -37,7 +38,7 @@ for(i in 1:(length(ankers) - 1)) {
   anker2 = paste0(tolower(ankers[i + 1]), collapse = "")
   assign(paste0("gt_", anker1,"_", anker2), value = value)
 }
-# Link anchor terms
+
 l = nrow(gt_hamburg_frankfurt)
 gt_hamburg_frankfurt = gt_hamburg_frankfurt$hits[249:l]
 gt_hamburg_spiegel = max(gt_hamburg_frankfurt) * gt_frankfurt_spiegel$hits[249:l]/100
@@ -62,26 +63,82 @@ ex2 = ex2[, c(13, 12, 1:11)]
 colnames(ex2) = c("Date", ankers)
 ex2 = melt(ex2, "Date")
 colnames(ex2) = c("Date", "Anchor", "Volume")
-ex_hamburg$Scaled = "No"
-ex2$Scaled = "Yes"
+ex_hamburg$Scaled = "Unscaled"
+ex2$Scaled = "Scaled"
 ex2 = rbind(ex_hamburg, ex2)
 ex2$Scaled = as.factor(ex2$Scaled)
+ex2$Scaled = relevel(ex2$Scaled, "Unscaled")
 rownames(ex2) = 1:nrow(ex2)
 cols = colorRampPalette(brewer.pal(9, "Set1"))(12)
 dates = seq(as.POSIXct("2011-1-1"), as.POSIXct("2017-1-1"), by = "12 mon")
 plot1 = ggplot(data = ex2, mapping = aes(x = Date, y = Volume, alpha = Scaled, color = Anchor)) + 
-  geom_line(size = 1) + stat_con +  theme(legend.position = c(0.15, 0.97)) + 
-  scale_alpha_discrete(name = "", range = c(0.4, 1),guide = guide_legend(reverse = TRUE, title = NULL)) + 
+  geom_line(size = 1) + stat_con +  
+  theme(legend.position = c(0.15, 0.98), legend.background = element_rect(fill = "transparent")) + 
+  scale_alpha_discrete(name = "", range = c(0.4, 1),guide = guide_legend(reverse = FALSE, title = NULL)) + 
   scale_colour_manual(values = cols, guide = FALSE) + 
   scale_x_datetime(breaks = dates,  labels = strftime(dates, format = "%m/%y"))
 
 plot2 = ggplot(data = ex2, mapping = aes(x = Date, y = Volume, alpha = Scaled, color = Anchor)) + 
-  scale_alpha_discrete(name = "", range = c(0.4, 1), guide = guide_legend(reverse = TRUE, title = NULL)) + 
+  scale_alpha_discrete(name = "", range = c(0.4, 1), guide = guide_legend(reverse = FALSE, title = NULL)) + 
   geom_line(size = 1) + stat_con + ylim(c(0, 9.6)) + theme(legend.position = "none") +
   scale_colour_manual(values = cols, guide = FALSE) + ylab("") +
   scale_x_datetime(breaks = dates,  labels = strftime(dates, format = "%m/%y"))
 
 par(bg = "white")
 png("readme_plots/anchors.png", width = 1200, height = 400, res = 120)
+plot_grid(plot1, plot2)
+dev.off()
+
+
+# Ambiguous movie titles
+mama = data_final[75, ]
+goethe = data_final[210, ]
+example_median1 = gtrends(keyword = "Mama", geo = "DE", time = "2011-11-01 2015-01-01")$interest_over_time
+example_median2 = gtrends(keyword = "Fack Ju Göhte", geo = "DE", time = "2011-11-01 2015-01-01")$interest_over_time
+example_median1$hits[example_median1$hits == "<1"] = 0
+example_median2$hits[example_median2$hits == "<1"] = 0
+example_median1$hits = as.numeric(example_median1$hits)
+example_median2$hits = as.numeric(example_median2$hits)
+
+plot1 = ggplot(data = example_median1, mapping = aes(x = date, y = hits)) + 
+  geom_line(size = 1) + ylim (0, 100) + stat_con + 
+  scale_x_datetime(breaks = dates, labels = strftime(dates, format = "%m/%y")) + labs(x = "Date", y = "Search Volume") +
+  geom_segment(x = as.numeric(mama$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(mama$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               y = 18, yend = 100, linetype = 2, color = "blue3") + 
+  geom_segment(x = as.numeric(mama$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(mama$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               y = 18, yend = 100, linetype = 2, color = "blue3") + 
+  geom_segment(x = as.numeric(mama$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(mama$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               y = 10, yend = 0, linetype = 2, color = "blue3") +
+  geom_segment(x = as.numeric(mama$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(mama$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               y = 10, yend = 0, linetype = 2, color = "blue3") +
+  geom_text(x = as.numeric(mama$Prognosedatum1 + as.difftime(tim = 10, units = "weeks")),
+            y = 15, label = "Forecast period", size = 5, color = "blue3")
+
+plot2 = ggplot(data = example_median2, aes(x = date, y = hits)) + 
+  geom_line(size = 1) + ylim (0, 100) + stat_con + 
+  scale_x_datetime(breaks = dates, labels = strftime(dates, format = "%m/%y")) + 
+  labs(x = "Datum", y = "Suchanfragen") + 
+  geom_segment(x = as.numeric(goethe$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(goethe$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               y = 68, yend = 100, linetype = 2, color = "blue3") + 
+  geom_segment(x = as.numeric(goethe$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(goethe$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               y = 68, yend = 100, linetype = 2, color = "blue3") + 
+  geom_segment(x = as.numeric(goethe$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(goethe$Prognosedatum1 - as.difftime(tim = 1, units = "weeks")),
+               y = 60, yend = 0, linetype = 2, color = "blue3") +
+  geom_segment(x = as.numeric(goethe$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               xend =  as.numeric(goethe$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
+               y = 60, yend = 0, linetype = 2, color = "blue3") +
+  geom_text(x = as.numeric(goethe$Prognosedatum3 - as.difftime(tim = 1, units = "weeks")),
+            y = 65, label = "Forecast period", size = 5, color = "blue3")
+
+
+par(bg = "white")
+png("readme_plots/median_normalization.png", width = 1200, height = 400, res = 120)
 plot_grid(plot1, plot2)
 dev.off()
