@@ -1,6 +1,7 @@
 require(ggplot2)
 require(reshape2)
 require(gridExtra)
+require(RColorBrewer)
 
 plot_requests = function(x, alpha, names, ...){
   #' Function to plot the weekly development of the average value of x over time
