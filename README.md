@@ -37,13 +37,13 @@ For step 1. it is mandatory to define a list of anchor terms whose search volume
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_1&space;=&space;\frac{anchor^1}{med(anchor^1)}." title="SF_1 = \frac{anchor^1}{med(anchor^1)}." />
-<\p>
+</p>
 
 To link each search term to the median of the first anchor it is necessary to link the anchors top down. For this pupose one calculates the *Scaling Factor* as quotient of the search volumina of one anchor and the next lower anchor term. The general formula for the scaling factor is given by:
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_i=SF_{i-1}\cdot&space;anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)}&space;\hspace{1cm}\quad\forall&space;i>2" title="SF_i=SF_{i-1}\cdot anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)} \hspace{1cm}\quad\forall i>2" />
-<\p>
+</p>
 
 To make movies like *Star Wars - the force awakens* and *Flores Raras* comparable the search terms are drawn and linked to the anchor words top down. So in a first step the search terms are drawn with first anchor and scaled with its Scaling Factor. If the maximum scaled seach volume of a search term within the time window of interest is below 25% of the scaled anchor it has to be redrawn with the next lower anchor term.
 
@@ -65,6 +65,6 @@ After substracting the median for each seach term we need to melt the 3 search t
 
 <p align="center">
 <img src="https://latex.codecogs.com/svg.latex?\inline&space;\underset{a,&space;b}{maximize}&space;f(gv_{j})&space;=&space;\rho(gv_{j},&space;visitors)&space;\\&space;with&space;\hspace{0.5cm}&space;gv_{j}&space;=&space;\begin{cases}&space;a_j&space;\cdot&space;mt_{ij}&space;&plus;&space;(1&space;-&space;a_j)&space;\cdot&space;mtf_{ij}&space;&&space;\text{for&space;}&space;mt&space;=&space;ct.&space;\\&space;b_j&space;\cdot&space;\Big{(}a_j&space;\cdot&space;mt_{ij}&space;&plus;&space;(1&space;-&space;a_j)&space;\cdot&space;mtf_{ij}\Big{)}&space;&plus;&space;(1&space;-&space;b_j)&space;\cdot&space;ct_{ij}&space;&&space;\text{for&space;}&space;ct&space;\neq&space;kt.&space;\end{cases}&space;\\&space;\\&space;w.r.t&space;\hspace{0.5&space;cm}&space;0&space;<&space;a_j&space;<&space;1&space;\hspace{0.5&space;cm}&space;and&space;\hspace{0.5&space;cm}&space;0&space;<&space;b_j&space;<&space;1" title="\underset{a, b}{maximize} f(gv_{j}) = \rho(gv_{j}, visitors) \\ with \hspace{0.5cm} gv_{j} = \begin{cases} a_j \cdot mt_{ij} + (1 - a_j) \cdot mtf_{ij} & \text{for } mt = ct. \\ b_j \cdot \Big{(}a_j \cdot mt_{ij} + (1 - a_j) \cdot mtf_{ij}\Big{)} + (1 - b_j) \cdot ct_{ij} & \text{for } ct \neq kt. \end{cases} \\ \\ w.r.t \hspace{0.5 cm} 0 < a_j < 1 \hspace{0.5 cm} and \hspace{0.5 cm} 0 < b_j < 1" />
-<\p>
+</p>
 
 We'll do this for each week <img src="https://latex.codecogs.com/svg.latex?\inline&space;j" title="j" />. To prevent overfitting of the weights a nested resampling approach is applied and the resulting weights are averaged. To prevent values of 0, the Google Value will be [Box-Cox transformed](https://en.wikipedia.org/wiki/Power_transform#Box%E2%80%93Cox_transformation) afterwards. Calculation of the weights for the Google Value is done in [this script](data_gathering_and_preprocessing/calculate_gv_weights.R). In  [this script](data_gathering_and_preprocessing/calculate_gv_weights.R) the weights are applied and the Google Value is Box-Cox tranformed.
