@@ -1,4 +1,5 @@
 require(gtrendsR)
+require(cowplot)
 source("utils/plotting_utils.R")
 load("data/ankers.RData")
 load("data/data_final/data_final.RData")
@@ -14,7 +15,7 @@ plot = ggplot(aes(y = Volume, x = Date, color = SearchTerm, group = SearchTerm),
   scale_x_datetime(breaks = dates, labels = strftime(dates, format = "%m/%y")) + stat_con + 
   scale_color_hue(h.start = 270) + theme(legend.position = c(0.2, 0.7), legend.title = element_blank())
 par(bg = "white")
-png("readme_plots/trends_example.png", width = 1200, height = 400, res = 120)
+pdf("readme_plots/trends_example.pdf", width = 12, height = 4)
 plot
 dev.off()
 
@@ -80,12 +81,12 @@ plot1 = ggplot(data = ex2, mapping = aes(x = Date, y = Volume, alpha = Scaled, c
 
 plot2 = ggplot(data = ex2, mapping = aes(x = Date, y = Volume, alpha = Scaled, color = Anchor)) + 
   scale_alpha_discrete(name = "", range = c(0.4, 1), guide = guide_legend(reverse = FALSE, title = NULL)) + 
-  geom_line(size = 1) + stat_con + ylim(c(0, 9.6)) + theme(legend.position = "none") +
+  geom_line(size = 1) + stat_con + ylim(c(0, 7.7)) + theme(legend.position = "none") +
   scale_colour_manual(values = cols, guide = FALSE) + ylab("") +
   scale_x_datetime(breaks = dates,  labels = strftime(dates, format = "%m/%y"))
 
 par(bg = "white")
-png("readme_plots/anchors.png", width = 1200, height = 400, res = 120)
+pdf("readme_plots/anchors.pdf", width = 12, height = 4)
 plot_grid(plot1, plot2)
 dev.off()
 
@@ -121,7 +122,7 @@ plot1 = ggplot(data = example_median1, mapping = aes(x = date, y = hits)) +
 plot2 = ggplot(data = example_median2, aes(x = date, y = hits)) + 
   geom_line(size = 1) + ylim (0, 100) + stat_con + 
   scale_x_datetime(breaks = dates, labels = strftime(dates, format = "%m/%y")) + 
-  labs(x = "Datum", y = "Suchanfragen") + 
+  labs(x = "Date", y = "") + 
   geom_segment(x = as.numeric(goethe$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
                xend =  as.numeric(goethe$Prognosedatum6 - as.difftime(tim = 1, units = "weeks")),
                y = 68, yend = 100, linetype = 2, color = "blue3") + 
@@ -139,6 +140,6 @@ plot2 = ggplot(data = example_median2, aes(x = date, y = hits)) +
 
 
 par(bg = "white")
-png("readme_plots/median_normalization.png", width = 1200, height = 400, res = 120)
+pdf("readme_plots/median_normalization.pdf", width = 12, height = 4)
 plot_grid(plot1, plot2)
 dev.off()

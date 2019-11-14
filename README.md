@@ -23,9 +23,10 @@ To get a single KPI that captures the people's interest in a movie a linear comb
 
 The following plot shows the Google Trend data for five famous franchises over time.
 
-<p align="center">
-![alt-text](readme_plots/trends_example.png)
-<\p>
+<object data="readme_plots/trends_example.pdf" type="application/pdf", width="1200px" height="400px">
+    <embed src="readme_plots/trends_example.pdf">
+    </embed>
+</object>
 
 The plot not only shows the problems mentioned above but also another crucial circummstance that often arises when searching for famous franchises: Since these movies are so popular they tend to have a high search volume even in times no new movie of the franchies is about to premiere. Nevertheless, we are only interested in the search volume generated through the premiere of the new movie, and not the general interest in the movie franchise itself.
 
@@ -53,17 +54,19 @@ The scaled search volume is now given as <img src="https://latex.codecogs.com/sv
 
 The result of the linked anchor terms (and so the Scaling Factors) are depicted below, whereby the right plot is just a zoom in on low level anchor terms:
 
-<p align="center">
-![alt-text](readme_plots/anchors.png)
-<\p>
+<object data="readme_plots/anchors.pdf" type="application/pdf" width="1200px" height="400px">
+    <embed src="readme_plots/anchors.pdf">
+    </embed>
+</object>
 
 Especially in the right plot it can be seen, that the scaled anchor terms are much more accurate than the unscaled ones and enable us to compare searcht terms of block busters to ones of smaller independent movies.
 
 To capture the impact of a movie premiere for ambigiuous movie titles the scaled search volume will be normalized according to 2. The following plot clearifies why this is necessary.
 
-<p align="center">
-![alt-text](readme_plots/median_normalization.png)
-<\p>
+<object data="readme_plots/median_normalization.pdf" type="application/pdf" width="1200px" height="400px">
+    <embed src="readme_plots/median_normalization.pdf">
+    </embed>
+</object>
 
 While the left plot shows the seach volume for the quite amiguous movie title [*Mama*](https://en.wikipedia.org/wiki/Mama_(2013_film)), the right one shows the seach volume for the term [*Fack Ju Göhte*](https://en.wikipedia.org/wiki/Fack_ju_G%C3%B6hte). Taking a look at the seach volume of *Mama* it appears, that the requests for this seach term do not really increase during the forecast period compared to previous peaks, but the days after it and normalizes some time after the premiere. One the other hand the search volume for *Fack Ju Göhte*, which was unexpected succesfull and produced two more successors, is not decreasing to the level before the premiere. These two examples show why substracting the median of the search volume *before* the forecast period is necessary. Google trends data gathering and the following steps 1. and 2. are done in [this script](data_gathering_and_preprocessing/gt_data_gathering.R)
 
