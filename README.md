@@ -35,7 +35,7 @@ To counteract the difficulties above the construction of a so called *Google Val
 
 For step 1. it is mandatory to define a list of anchor terms whose search volume is as constant as possible over time to prevent disturbed standarization of the search terms. A good choice for such terms are cities or news papers. starting from bigger citiesand continuing to lokal newspapers. The first anchor is standardized by its own median to get the first *Scaling Factor*:
 
-![alt-text](http://www.sciweavers.org/tex2img.php?eq=SF_%7B1%7D%20%3D%20%5Cfrac%7Banchor_%7B1%7D%7D%7Bmed%28anchor_%7B1%7D%29%7D&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
+<img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_1&space;=&space;\frac{anchor^1}{med(anchor^1)}." title="SF_1 = \frac{anchor^1}{med(anchor^1)}." />
 
 To linke each search term to the median of the first anchor it is necessary to link the anchors top down. For this pupose one calculates the *Scaling Factor* as quotient of the search volumina of one anchor and the next lower anchor term. The general formula for the scaling factor is given by:
 
