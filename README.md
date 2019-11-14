@@ -35,11 +35,11 @@ To counteract the difficulties above the construction of a so called *Google Val
 
 For step 1. it is mandatory to define a list of anchor terms whose search volume is as constant as possible over time to prevent disturbed standarization of the search terms. A good choice for such terms are cities or news papers. starting from bigger citiesand continuing to lokal newspapers. The first anchor is standardized by its own median to get the first *Scaling Factor*:
 
-$SF_{1} = \frac{anchor_{1}}{med(anchor_{1})}$
+![alt-text](http://www.sciweavers.org/tex2img.php?eq=SF_%7B1%7D%20%3D%20%5Cfrac%7Banchor_%7B1%7D%7D%7Bmed%28anchor_%7B1%7D%29%7D&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
 
 To linke each search term to the median of the first anchor it is necessary to link the anchors top down. For this pupose one calculates the *Scaling Factor* as quotient of the search volumina of one anchor and the next lower anchor term. The general formula for the scaling factor is given by:
 
-$SF_i = SF_{i-1} \cdot anker_{i-1}^i = \frac{\prod_{j=0}^{i-2}anker_{i-j-1}^{i-j}}{med(anker^1)} \hspace{1cm}\quad \forall i >1$
+<img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_i=SF_{i-1}\cdot&space;anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)}&space;\hspace{1cm}\quad\forall&space;i>2" title="SF_i=SF_{i-1}\cdot anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)} \hspace{1cm}\quad\forall i>2" />
 
 To make movies like *Star Wars - the force awakens* and *Flores Raras* comparable the search terms are drawn and linked to the anchor words top down. So in a first step the search terms are drawn with first anchor and scaled with its Scaling Factor. If maximum scaled seach volume of a search term within the time window of interest is below  0.25 it has to be redrawn with the next lower anchor term.
 
