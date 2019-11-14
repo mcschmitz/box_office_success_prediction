@@ -1,4 +1,3 @@
-# Funktion zur Berechnung eines Prognoseintervalls bei additiven Modellen:
 calculate_interval = function(gam, prediction, range) {
   #' Function to calculate a forecast intervall for generalized additive models
   #' 
