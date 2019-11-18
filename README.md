@@ -68,3 +68,5 @@ After substracting the median for each seach term we need to melt the 3 search t
 </p>
 
 We'll do this for each week <img src="https://latex.codecogs.com/svg.latex?\inline&space;j" title="j" />. To prevent overfitting of the weights a nested resampling approach is applied and the resulting weights are averaged. To prevent values of 0, the Google Value will be [Box-Cox transformed](https://en.wikipedia.org/wiki/Power_transform#Box%E2%80%93Cox_transformation) afterwards. Calculation of the weights for the Google Value is done in [this script](data_gathering_and_preprocessing/calculate_gv_weights.R). In  [this script](data_gathering_and_preprocessing/calculate_gv_weights.R) the weights are applied and the Google Value is Box-Cox tranformed.
+
+After the data is gathered, descriptive analysis is mostly done by the notebooks in [the data analysis directory](data_analysis)
