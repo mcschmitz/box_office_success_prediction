@@ -14,7 +14,7 @@ premiere and 70% one day before premiere which shall be the baseline for this re
 ### Data gathering, -preprocessing and descriptive analysis
 The provided dataset contains key data for about 900 movies that premiered in Germany between 01/03/2013 and 07/07/2016. It contains 100 features of the movies like age rating, genre, studio as well as the number of ordered copies which is referring to the number of cinemas in which a movie is presented and the number of visitors of the movies on the first weekend. The number of visitors is the target which will be forecasted.
 
-After preprocessing of the raw movie data is done in [this script](preproessing/preprocess_movies_data.R) the Google Trendds data will be collected and preprocessed.
+After preprocessing of the raw movie data is done in [this script](preproessing/preprocess_movies_data.R) the Google Trends data will be collected and preprocessed.
 
 Capturing the popularity of a movie on Google Search is a hard task mainly due to 2 facts. First, movie titles are not always nonambiguous meaning that a search for *Django Unchained* will almost certainly lead you to a result linked to the Tarantino movie, whereas, a search for a Biopic like *Hitchcock* might result in a Webpage about the director itself. Second, the search volume information of a search term on Google is not publicly available in an evaluable form, meaning that Google Trends (which will serve as the main data source) only offfers natural numbers whereby, the maximum value in the observed time window is scaled to 100, which makes it impossible to compare a movie like *Star Wars - The force awakens* to an independent movie like *Flores Raras*, because the volume for *Flores Raras* will mostly if not always be scaled to 0. Therefore, the main task in gathering the search request data and calculating the popularity KPIs was two-sided:
 
@@ -55,13 +55,14 @@ The result of the linked anchor terms (and so the Scaling Factors) are depicted 
 
 ![alt-text](readme_plots/anchors.png)
 
-Especially in the right plot it can be seen, that the scaled anchor terms are much more accurate than the unscaled ones and enable us to compare searcht terms of block busters to ones of smaller independent movies.
+Especially in the right plot it can be seen, that the scaled anchor terms are much more accurate than the unscaled ones and enable us to compare searcht terms of block busters to ones of smaller independent movies. Google trends data collection of the anker terms and the calculation of the scaling factors is done in [this script](preprocessing/collect_gt_data_ankers.R)
+
 
 To capture the impact of a movie premiere for ambigiuous movie titles the scaled search volume will be normalized according to 2. The following plot clearifies why this is necessary.
 
 ![alt-text](readme_plots/median_normalization.png)
 
-While the left plot shows the seach volume for the quite amiguous movie title [*Mama*](https://en.wikipedia.org/wiki/Mama_(2013_film)), the right one shows the seach volume for the term [*Fack Ju Göhte*](https://en.wikipedia.org/wiki/Fack_ju_G%C3%B6hte). Taking a look at the seach volume of *Mama* it appears, that the requests for this seach term do not really increase during the forecast period compared to previous peaks, but the days after it and normalizes some time after the premiere. One the other hand the search volume for *Fack Ju Göhte*, which was unexpected succesfull and produced two more successors, is not decreasing to the level before the premiere. These two examples show why substracting the median of the search volume *before* the forecast period is necessary. Google trends data gathering and the following steps 1. and 2. are done in [this script](data_gathering_and_preprocessing/gt_data_gathering.R)
+While the left plot shows the seach volume for the quite amiguous movie title [*Mama*](https://en.wikipedia.org/wiki/Mama_(2013_film)), the right one shows the seach volume for the term [*Fack Ju Göhte*](https://en.wikipedia.org/wiki/Fack_ju_G%C3%B6hte). Taking a look at the seach volume of *Mama* it appears, that the requests for this seach term do not really increase during the forecast period compared to previous peaks, but the days after it and normalizes some time after the premiere. One the other hand the search volume for *Fack Ju Göhte*, which was unexpected succesfull and produced two more successors, is not decreasing to the level before the premiere. These two examples show why substracting the median of the search volume *before* the forecast period is necessary.
 
 After substracting the median for each seach term we need to melt the 3 search terms for each movie to a single KPI (Google Value *gv*) by applying a linear transformation. To do so we'll melt the search volumina of the main title (*mt*) and main title + "film" (*mtf*) to a single value. If the movie has a subtitle we'll take the search volume of the complete title (*ct*) into consideration in a second step. The resulting linear combination should maximize the correlation between the Google Value and the amount of visitors:
 
