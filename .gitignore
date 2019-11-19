@@ -6,7 +6,8 @@
 BoxOfficeRev.Rproj
 
 # Data
-data/xlsm
+data/*
+!data/movies.csv
 
 # Docs
 README.html
