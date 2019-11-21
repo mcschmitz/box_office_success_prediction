@@ -7,7 +7,7 @@ require(reshape2)
 require(matrixStats)
 
 
-exportGT = function(terms, startdates, enddates = NULL, geo = "DE", anker, ...) {
+export_gt_data = function(terms, startdates, enddates = NULL, geo = "DE", anker, ...) {
   #' Function to gather Google Trends data
   #' 
   #' @param terms [character]: Search terms
@@ -76,10 +76,10 @@ exportGT = function(terms, startdates, enddates = NULL, geo = "DE", anker, ...) 
       else {
         trends[[i]] = trends[[i]]
       }
+      Sys.sleep(runif(1, 1, 3))
     }
     setTxtProgressBar(pb, i)
     if (i != length(terms_list)) {
-      Sys.sleep(runif(1, 10, 12))
     }
     
     if (i %% 25 == 0){
