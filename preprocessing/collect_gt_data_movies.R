@@ -2,7 +2,7 @@ load("data/movies_preprocessed.RData")
 load("data/gt_data_ankers.RData")
 source("utils/data_gathering_utils.R")
 
-# Gather data for the main title of the movie
+# Gather data for the main title of the movie  ========================================================================
 terms <- main_title
 levels_idx <- 1:length(terms)
 for (i in 1:length(ankers)){
@@ -41,7 +41,7 @@ rm(list = ls() [which(ls() != "gt_data_main_title")])
 save.image("data/gt_data_main_title.RData")
 
 
-# Gather data for the main title  + film
+# Gather data for the main title  + film  =============================================================================
 load("data/movies_preprocessed.RData")
 load("data/gt_data_ankers.RData")
 source("utils/data_gathering_utils.R")
@@ -82,7 +82,7 @@ rm(list = ls() [which(ls() != "gt_data_main_title_film")])
 save.image("data/gt_data_main_title_film.RData")
 
 
-# Gather data for the complete title
+# Gather data for the complete title  =================================================================================
 load("data/movies_preprocessed.RData")
 load("data/gt_data_ankers.RData")
 source("utils/data_gathering_utils.R")
@@ -118,14 +118,16 @@ gt_data_complete_title <- x
 gt_data_complete_title <- as.data.frame(t(gt_data_complete_title[,4:ncol(gt_data_complete_title)]))
 colnames(gt_data_complete_title) <- gt_data1[, 2]
 rownames(gt_data_complete_title) <- 1:nrow(gt_data_complete_title)
-complete_title <- complete_title[which(main_title != complete_title)]
-gt_data_complete_title <- cbind("title" = complete_title, gt_data_complete_title)
+gt_data_complete_title <- cbind("title" = complete_title[which(main_title != complete_title)], gt_data_complete_title)
+load("data/gt_data_main_title.RData")
+gt_data_complete_title = rbind(gt_data_main_title[which(complete_title == main_title), ], gt_data_complete_title)
+
 head(gt_data_complete_title)
 rm(list = ls() [which(ls() != "gt_data_complete_title")])
 save.image("data/gt_data_complete_title.RData")
 
 
-# Concatenate Workspaces and save them
+# Concatenate Workspaces and save them  ===============================================================================
 load("data/gt_data_ankers.RData")
 gt_kino <- gtrends(keyword = "Kino", geo = "DE", 
                   time = paste(as.character(trunc(startdate, "months")),
@@ -136,4 +138,4 @@ load("data/gt_data_main_title_film.RData")
 load("data/gt_data_complete_title.RData")
 load("data/gt_data_main_title.RData")
 
-save.image("data/gt-data_anker/gt-data_anker_final.RData")
+save.image("data/gt_data_complete.RData")

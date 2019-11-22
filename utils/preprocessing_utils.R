@@ -90,7 +90,7 @@ select_gt_data = function(trends, enddates, terms) {
   data = as.data.frame(data)
   data_aggregated = as.data.frame(data_aggregated)
   data = cbind(terms, data, data_aggregated)
-  colnames(data) = c("Filmtitel", paste0("Woche", 6:1), paste0("Aggregation", 6:1))
+  colnames(data) = c("title", paste0("week", 6:1), paste0("aggregation", 6:1))
   return(data)
 }
 
@@ -127,7 +127,7 @@ calculate_google_value = function(data, weights) {
   google_values = matrix(data = NA, nrow = nrow(data), ncol = 12)
 
     for(i in 1:6) {
-    columns = head(grep(pattern = paste0("Woche", i), x = colnames(data)), 3)
+    columns = head(grep(pattern = paste0("woche", i), x = colnames(data)), 3)
     data_sub = data[, columns]
     weights_sub = weights[, 7 - i]
     google_values[, 7 - i] = weights_sub[1] * data_sub[, 1] + 
@@ -142,7 +142,7 @@ calculate_google_value = function(data, weights) {
   }
 
     for(i in 1:6) {
-    columns = head(grep(pattern = paste0("Aggregation", i),
+    columns = head(grep(pattern = paste0("aggregation", i),
                         x = colnames(data)), 3)
     data_sub = data[, columns]
     weights_sub = weights[, 13 - i]
@@ -156,7 +156,7 @@ calculate_google_value = function(data, weights) {
     }
   }  
   google_values = as.data.frame(google_values)
-  colnames(google_values) = c(paste0("Woche", 6:1), paste0("Aggregation", 6:1))
+  colnames(google_values) = c(paste0("woche", 6:1), paste0("aggregation", 6:1))
   return(google_values)
 }
 
