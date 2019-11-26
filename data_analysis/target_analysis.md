@@ -54,12 +54,6 @@ plot2 <- ggplot(data = data_final, mapping = aes(sample = visitors_premiere_week
 grid.arrange(plot1, plot2, ncol = 2)
 ```
 
-    ## Warning: Removed 2 rows containing non-finite values (stat_bin).
-
-    ## Warning: Removed 2 rows containing non-finite values (stat_density).
-
-    ## Warning: Removed 2 rows containing missing values (geom_bar).
-
 ![](target_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- --> To
 get a normal distribution the target variable is log transformed. The
 plots above show, that the log transformed taget variable seems to
@@ -75,9 +69,6 @@ fit_normal <- fitdistr(x = data_final$visitors_premiere_weekend, densfun = "norm
 ks.test(x = data_final$visitors_premiere_weekend, y = "pnorm", mean = fit_normal$estimate[1], 
         sd = fit_normal$estimate[2], exact = TRUE)
 ```
-
-    ## Warning in ks.test(x = data_final$visitors_premiere_weekend, y = "pnorm", : ties should not be present for the
-    ## Kolmogorov-Smirnov test
 
     ## 
     ##  One-sample Kolmogorov-Smirnov test
@@ -127,9 +118,6 @@ fit_lognormal <- fitdistr(x = data_final$visitors_premiere_weekend_log, densfun 
 ks.test(x = data_final$visitors_premiere_weekend_log, y = "pnorm", 
         mean = fit_lognormal$estimate[1], sd = fit_lognormal$estimate[2], exact = TRUE)
 ```
-
-    ## Warning in ks.test(x = data_final$visitors_premiere_weekend_log, y = "pnorm", : ties should not be present for the
-    ## Kolmogorov-Smirnov test
 
     ## 
     ##  One-sample Kolmogorov-Smirnov test
@@ -189,8 +177,6 @@ ggplot(aes(x = visitors_premiere_weekend), data = data_final) +
   scale_color_manual(name = "", values = c("red3", "black")) + theme(legend.position = c(0.23, 0.95))
 ```
 
-    ## Warning: Removed 2 rows containing missing values (geom_bar).
-
 ![](target_analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 Applying the three tests results in the following ouputs:
@@ -204,9 +190,6 @@ fit_gamma <- fitdistr(x = data_final$visitors_premiere_weekend, densfun = "gamma
 ks.test(x = data_final$visitors_premiere_weekend, y = "pgamma", shape = fit_gamma$estimate[1], 
         scale = fit_gamma$estimate[2], exact = TRUE)
 ```
-
-    ## Warning in ks.test(x = data_final$visitors_premiere_weekend, y = "pgamma", : ties should not be present for the
-    ## Kolmogorov-Smirnov test
 
     ## 
     ##  One-sample Kolmogorov-Smirnov test

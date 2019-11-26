@@ -34,7 +34,7 @@ grid.arrange(plot1, plot2, ncol = 2)
 
 The target obviously isn't normal distributed. The 25% quantile of the target is 8952, the median is at 31764 and the 75% quantile is 112607, whereas the maximum value is 2138869 visitors.
 Whereas, the logarithmic target seems to follow a normal distributionquite well.
-```{r}
+```{r, warning=FALSE}
 nbins <- nclass.scott(data_final$visitors_premiere_weekend_log)
 mean <- mean(data_final$visitors_premiere_weekend_log)
 sd <- sd(data_final$visitors_premiere_weekend_log)
@@ -58,7 +58,7 @@ To get a normal distribution the target variable is log transformed. The plots a
 
 The following tests check for normal distribution of the untransformed target:
 
-```{r}
+```{r, warning=FALSE}
 fit_normal <- fitdistr(x = data_final$visitors_premiere_weekend, densfun = "normal")
 # Kolmogorov-Smirnov-Test:
 ks.test(x = data_final$visitors_premiere_weekend, y = "pnorm", mean = fit_normal$estimate[1], 
@@ -75,7 +75,7 @@ None of these test result in a p-value less than 0.05. Therefore, the Null hypot
 tests and with it the assumption of the untransformed target feature following a normal distribution.
 
 Let's have a look on the logarithmic target feature:
-```{r}
+```{r, warning=FALSE}
 fit_lognormal <- fitdistr(x = data_final$visitors_premiere_weekend_log, densfun = "lognormal")
 # Kolmogorov-Smirnov-Test:
 ks.test(x = data_final$visitors_premiere_weekend_log, y = "pnorm", 
@@ -94,7 +94,7 @@ statistically siginifcant degree.
 
 A final test should also take the gamma distribution into consideration, which seems to fit the distribution of the 
 target very well if one takes a look at the following plot:
-```{r}
+```{r, warning=FALSE}
 nbins <- nclass.scott(data_final$visitors_premiere_weekend)
 shape <- mean(data_final$visitors_premiere_weekend) ^ 2 / var(data_final$visitors_premiere_weekend)
 scale <- var(data_final$visitors_premiere_weekend) / mean(data_final$visitors_premiere_weekend)
@@ -110,7 +110,7 @@ ggplot(aes(x = visitors_premiere_weekend), data = data_final) +
 
 Applying the three tests results in the following ouputs:
 
-```{r}
+```{r, warning=FALSE}
 shape <- mean(data_final$visitors_premiere_weekend) ^ 2 / var(data_final$visitors_premiere_weekend)
 scale <- var(data_final$visitors_premiere_weekend) / mean(data_final$visitors_premiere_weekend)
 fit_gamma <- fitdistr(x = data_final$visitors_premiere_weekend, densfun = "gamma", 
