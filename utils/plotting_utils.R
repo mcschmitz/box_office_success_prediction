@@ -3,16 +3,16 @@ require(reshape2)
 require(gridExtra)
 require(RColorBrewer)
 
-plot_requests = function(x, alpha, names, ...){
+plot_requests <- function(x, alpha, names, ...){
   #' Function to plot the weekly development of the average value of x over time
   #' 
   #' @param x [numeric]: Numeric value to plot over time
   #'
   #' @return Plots the weekly average of requests made
   
-  x_mean = apply(X = x, MARGIN = 1, FUN = mean , na.rm = TRUE)
-  x_melt = melt(x)
-  names(x_melt) = names
+  x_mean <- apply(X = x, MARGIN = 1, FUN = mean , na.rm = TRUE)
+  x_melt <- melt(x)
+  names(x_melt) <- names
   
   ggplot(data = x_melt, mapping = aes(y = Req)) + 
     geom_line(colour = "brown4", aes(group = Movie, x = Date, alpha = alpha), size = 1) +
@@ -24,13 +24,13 @@ plot_requests = function(x, alpha, names, ...){
     theme(legend.position = c(0.22, 0.8)) + stat_con
 }
 
-thousand_dot = function(x) {
+thousand_dot <- function(x) {
   format(x, big.mark = " ", scientific = FALSE)
 }
 
-number_ticks = function(n) {function(limits) pretty(limits, n)}
+number_ticks <- function(n) {function(limits) pretty(limits, n)}
 
-stat_con = theme_classic() + 
+stat_con <- theme_classic() + 
   theme(text = element_text(size = 12), axis.title = element_text(size = 12), axis.text = element_text(size = 12),
         legend.text = element_text(size = 12), plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
         strip.text.y = element_text(size = 12), legend.text.align = 0, strip.placement = "outside", 

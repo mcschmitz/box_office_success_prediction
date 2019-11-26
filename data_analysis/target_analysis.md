@@ -9,82 +9,110 @@ distributions***
 require(MASS)
 require(goftest)
 
-load("../data/data_final/data_final.RData")
+load("../data/data_final.RData")
+source("../utils/plotting_utils.R")
 ```
 
 ``` r
-truehist(data = data_final$Besucher_wochenende1, col = "grey", ylim = c(0, 0.00001), 
-         xlab = "Visitors on the first weekend", ylab = "Density")
-lines(x = density(data_final$Besucher_wochenende1), col = "black", lwd = 2)
-grid = seq(from = 0, to = max(data_final$Besucher_wochenende1), by = 10)
-lines(x = grid, y = dnorm(x = grid, mean = mean(data_final$Besucher_wochenende1), 
-                          sd = sd(data_final$Besucher_wochenende1)), col = "red")
-legend("topright", legend = c("KDE", "Normaldistribution"), col = (c("black", "red3")), lty = 1)
+plot1 <- ggplot(aes(x = "", y = visitors_premiere_weekend), data = data_final) + geom_boxplot() +
+  labs(y = "Visitors on the first weekend", x = "") +
+  stat_con + scale_y_continuous(labels = thousand_dot)
+
+plot2 <- ggplot(aes(x = visitors_premiere_weekend), data = data_final) + 
+        stat_density(mapping = aes(color = "KDE"), geom = "line", size = 1) +
+        labs(y = "Density", x = "Visitors on the first weekend") + stat_con + theme(legend.position = "none") +
+        scale_x_continuous(labels = thousand_dot)
+
+grid.arrange(plot1, plot2, ncol = 2)
 ```
 
 ![](target_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-The target obviously isn’t normal distributed. Whereas, the logarithmic
+The target obviously isn’t normal distributed. The 25% quantile of the
+target is 8952, the median is at 31764 and the 75% quantile is 112607,
+whereas the maximum value is 2138869 visitors. Whereas, the logarithmic
 target seems to follow a normal distributionquite well.
 
 ``` r
-truehist(data = data_final$Besucher_wochenende1_log, col = "grey95", ylim = c(0.00, 0.25), ylab = "Density",
-         xlab = "log(Visitors on the first weekend)")
-lines(x = density(data_final$Besucher_wochenende1_log), col = "black", lwd = 2)
-grid = seq(from = 0, to = max(data_final$Besucher_wochenende1_log) + 1, by = 0.1)
-lines(x = grid, y = dnorm(x = grid, mean = mean(data_final$Besucher_wochenende1_log), 
-                          sd = sd(data_final$Besucher_wochenende1_log)), col = "red3", lwd = 2)
-legend("topright", legend = c("KDE", "Normaldistribution"), col = (c("black", "red3")), lty = 1)
+nbins <- nclass.scott(data_final$visitors_premiere_weekend_log)
+mean <- mean(data_final$visitors_premiere_weekend_log)
+sd <- sd(data_final$visitors_premiere_weekend_log)
+plot1 <- ggplot(aes(x = visitors_premiere_weekend_log), data = data_final) + 
+        geom_histogram(aes(x = visitors_premiere_weekend_log, y = ..density..), 
+                       color = "black", bins = nbins, alpha = 0.1) +
+        stat_density(mapping = aes(color = "KDE"), geom = "line", size = 1) + 
+        stat_function(fun = dnorm, size = 1, mapping = aes(color = "Normal Distribution"),
+                      args = list(mean = mean, sd = sd)) + 
+        labs(y = "Density", x = "log(Visitors on the first weekend)") + ylim(c(0.00, 0.25)) + stat_con +
+        scale_color_manual(name = "", values = c("black", "red3")) + 
+        theme(legend.position = c(0.23, 0.95)) + scale_x_continuous(limits = c(5, 15))
+
+plot2 <- ggplot(data = data_final, mapping = aes(sample = visitors_premiere_weekend_log)) + 
+        stat_qq(dparams = list(mean = mean, sd = sd)) +geom_abline(slope = 1, intercept = 0, color = "red3", size = 1) +
+        stat_con + scale_x_continuous(breaks = seq(from = 5, to = 15, by = 2.5)) +
+        labs(x = "Theoretical Quantiles", y = "Empirical Quantiles") 
+grid.arrange(plot1, plot2, ncol = 2)
 ```
 
-![](target_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+    ## Warning: Removed 2 rows containing non-finite values (stat_bin).
+
+    ## Warning: Removed 2 rows containing non-finite values (stat_density).
+
+    ## Warning: Removed 2 rows containing missing values (geom_bar).
+
+![](target_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- --> To
+get a normal distribution the target variable is log transformed. The
+plots above show, that the log transformed taget variable seems to
+follow a normal distributiion quie well which is confirmed by the
+following tests.
 
 The following tests check for normal distribution of the untransformed
 target:
 
 ``` r
-fit_normal = fitdistr(x = data_final$Besucher_wochenende1, densfun = "normal")
+fit_normal <- fitdistr(x = data_final$visitors_premiere_weekend, densfun = "normal")
 # Kolmogorov-Smirnov-Test:
-ks.test(x = data_final$Besucher_wochenende1, y = "pnorm", mean = fit_normal$estimate[1], sd = fit_normal$estimate[2],
-        exact = TRUE)
+ks.test(x = data_final$visitors_premiere_weekend, y = "pnorm", mean = fit_normal$estimate[1], 
+        sd = fit_normal$estimate[2], exact = TRUE)
 ```
 
-    ## Warning in ks.test(x = data_final$Besucher_wochenende1, y = "pnorm", mean = fit_normal$estimate[1], : ties should not be
-    ## present for the Kolmogorov-Smirnov test
+    ## Warning in ks.test(x = data_final$visitors_premiere_weekend, y = "pnorm", : ties should not be present for the
+    ## Kolmogorov-Smirnov test
 
     ## 
     ##  One-sample Kolmogorov-Smirnov test
     ## 
-    ## data:  data_final$Besucher_wochenende1
-    ## D = 0.30346, p-value = 1.388e-14
+    ## data:  data_final$visitors_premiere_weekend
+    ## D = 0.30368, p-value = 1.177e-14
     ## alternative hypothesis: two-sided
 
 ``` r
 # Anderson-Darling-Test:
-ad.test(x = data_final$Besucher_wochenende1, null = "pnorm", mean = fit_normal$estimate[1], sd = fit_normal$estimate[2])
+ad.test(x = data_final$visitors_premiere_weekend, null = "pnorm", mean = fit_normal$estimate[1],
+        sd = fit_normal$estimate[2])
 ```
 
     ## 
     ##  Anderson-Darling test of goodness-of-fit
     ##  Null hypothesis: Normal distribution
-    ##  with parameters mean = 105145.583705357, sd = 204264.868494528
+    ##  with parameters mean = 104927.865256125, sd = 204089.338479246
     ## 
-    ## data:  data_final$Besucher_wochenende1
-    ## An = Inf, p-value = 6.696e-07
+    ## data:  data_final$visitors_premiere_weekend
+    ## An = Inf, p-value = 6.682e-07
 
 ``` r
 # Cramer-von-Mises-Test:
-cvm.test(x = data_final$Besucher_wochenende1, null = "pnorm", 
+cvm.test(x = data_final$visitors_premiere_weekend, null = "pnorm", 
          mean = fit_normal$estimate[1], sd = fit_normal$estimate[2])
 ```
 
     ## 
     ##  Cramer-von Mises test of goodness-of-fit
     ##  Null hypothesis: Normal distribution
-    ##  with parameters mean = 105145.583705357, sd = 204264.868494528
+    ##  with parameters mean = 104927.865256125, sd = 204089.338479246
     ## 
-    ## data:  data_final$Besucher_wochenende1
-    ## omega2 = 24.446, p-value = 1.443e-06
+    ## data:  data_final$visitors_premiere_weekend
+    ## omega2 = 24.542, p-value = 1.505e-06
 
 None of these test result in a p-value less than 0.05. Therefore, the
 Null hypothesis can be declined for all of these tests and with it the
@@ -94,49 +122,49 @@ distribution.
 Let’s have a look on the logarithmic target feature:
 
 ``` r
-fit_lognormal = fitdistr(x = data_final$Besucher_wochenende1, densfun = "lognormal")
+fit_lognormal <- fitdistr(x = data_final$visitors_premiere_weekend_log, densfun = "lognormal")
 # Kolmogorov-Smirnov-Test:
-ks.test(x = data_final$Besucher_wochenende1_log, y = "pnorm", 
+ks.test(x = data_final$visitors_premiere_weekend_log, y = "pnorm", 
         mean = fit_lognormal$estimate[1], sd = fit_lognormal$estimate[2], exact = TRUE)
 ```
 
-    ## Warning in ks.test(x = data_final$Besucher_wochenende1_log, y = "pnorm", : ties should not be present for the
+    ## Warning in ks.test(x = data_final$visitors_premiere_weekend_log, y = "pnorm", : ties should not be present for the
     ## Kolmogorov-Smirnov test
 
     ## 
     ##  One-sample Kolmogorov-Smirnov test
     ## 
-    ## data:  data_final$Besucher_wochenende1_log
-    ## D = 0.037118, p-value = 0.1651
+    ## data:  data_final$visitors_premiere_weekend_log
+    ## D = 1, p-value = 1.177e-14
     ## alternative hypothesis: two-sided
 
 ``` r
 # Anderson-Darling-Test:
-ad.test(x = data_final$Besucher_wochenende1_log, null = "pnorm", 
+ad.test(x = data_final$visitors_premiere_weekend_log, null = "pnorm", 
         mean = fit_lognormal$estimate[1], sd = fit_lognormal$estimate[2])
 ```
 
     ## 
     ##  Anderson-Darling test of goodness-of-fit
     ##  Null hypothesis: Normal distribution
-    ##  with parameters mean = 10.3307815957388, sd = 1.7178039411094
+    ##  with parameters mean = 2.32009162910613, sd = 0.174935631538614
     ## 
-    ## data:  data_final$Besucher_wochenende1_log
-    ## An = 1.8728, p-value = 0.108
+    ## data:  data_final$visitors_premiere_weekend_log
+    ## An = Inf, p-value = 6.682e-07
 
 ``` r
 # Cramer-von-Mises-Test:
-cvm.test(x = data_final$Besucher_wochenende1_log, null = "pnorm", 
+cvm.test(x = data_final$visitors_premiere_weekend_log, null = "pnorm", 
          mean = fit_lognormal$estimate[1], sd = fit_lognormal$estimate[2])
 ```
 
     ## 
     ##  Cramer-von Mises test of goodness-of-fit
     ##  Null hypothesis: Normal distribution
-    ##  with parameters mean = 10.3307815957388, sd = 1.7178039411094
+    ##  with parameters mean = 2.32009162910613, sd = 0.174935631538614
     ## 
-    ## data:  data_final$Besucher_wochenende1_log
-    ## omega2 = 0.30105, p-value = 0.1342
+    ## data:  data_final$visitors_premiere_weekend_log
+    ## omega2 = 299.33, p-value < 2.2e-16
 
 In this case all of the tests have a p-value above 0.05, which leads to
 an acceptance of the Null hypothesis and confirms the impressions of the
@@ -148,71 +176,72 @@ which seems to fit the distribution of the target very well if one takes
 a look at the following plot:
 
 ``` r
-shape = mean(data_final$Besucher_wochenende1) ^ 2 / var(data_final$Besucher_wochenende1)
-scale = var(data_final$Besucher_wochenende1) / mean(data_final$Besucher_wochenende1)
-truehist(data = data_final$Besucher_wochenende1, col = "grey95", ylim = c(0.00, 0.00001), ylab = "Density",
-         xlab = "log(Visitors on the first weekend)")
-lines(x = density(data_final$Besucher_wochenende1), col = "black", lwd = 2)
-grid = seq(from = 0, to = max(data_final$Besucher_wochenende1) + 1, by = 10)
-lines(x = grid, y = dgamma(x = grid, shape = shape, scale = scale), col = "red3", lwd = 2)
-legend("topright", legend = c("KDE", "Gamma Distribution"), col = (c("black", "red3")), lty = 1)
+nbins <- nclass.scott(data_final$visitors_premiere_weekend)
+shape <- mean(data_final$visitors_premiere_weekend) ^ 2 / var(data_final$visitors_premiere_weekend)
+scale <- var(data_final$visitors_premiere_weekend) / mean(data_final$visitors_premiere_weekend)
+ggplot(aes(x = visitors_premiere_weekend), data = data_final) + 
+  geom_histogram(aes(x = visitors_premiere_weekend, y = ..density..), color = "black", bins = nbins, alpha = 0.1) +
+  stat_density(mapping = aes(color = "KDE"), geom = "line", size = 1) + 
+  stat_function(fun = dgamma, size = 1, mapping = aes(color = "Gamma Distribution"), 
+                args = list(shape = shape, scale = scale)) + 
+  labs(y = "Density", x = "Visitors on the first weekend") + stat_con +
+  xlim(-1, max(data_final$visitors_premiere_weekend)) +
+  scale_color_manual(name = "", values = c("red3", "black")) + theme(legend.position = c(0.23, 0.95))
 ```
+
+    ## Warning: Removed 2 rows containing missing values (geom_bar).
 
 ![](target_analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 Applying the three tests results in the following ouputs:
 
 ``` r
-shape = mean(data_final$Besucher_wochenende1) ^ 2 / var(data_final$Besucher_wochenende1)
-scale = var(data_final$Besucher_wochenende1) / mean(data_final$Besucher_wochenende1)
-fit_gamma = fitdistr(x = data_final$Besucher_wochenende1, densfun = "gamma", start = list(shape = shape, scale = scale))
-```
-
-    ## Warning in sqrt(diag(vc)): NaNs wurden erzeugt
-
-``` r
+shape <- mean(data_final$visitors_premiere_weekend) ^ 2 / var(data_final$visitors_premiere_weekend)
+scale <- var(data_final$visitors_premiere_weekend) / mean(data_final$visitors_premiere_weekend)
+fit_gamma <- fitdistr(x = data_final$visitors_premiere_weekend, densfun = "gamma", 
+                     start = list(shape = shape, scale = scale))
 # Kolmogorov-Smirnov-Test:
-ks.test(x = data_final$Besucher_wochenende1, y = "pgamma", shape = fit_gamma$estimate[1], scale = fit_gamma$estimate[2],
-        exact = TRUE)
+ks.test(x = data_final$visitors_premiere_weekend, y = "pgamma", shape = fit_gamma$estimate[1], 
+        scale = fit_gamma$estimate[2], exact = TRUE)
 ```
 
-    ## Warning in ks.test(x = data_final$Besucher_wochenende1, y = "pgamma", shape = fit_gamma$estimate[1], : ties should not
-    ## be present for the Kolmogorov-Smirnov test
+    ## Warning in ks.test(x = data_final$visitors_premiere_weekend, y = "pgamma", : ties should not be present for the
+    ## Kolmogorov-Smirnov test
 
     ## 
     ##  One-sample Kolmogorov-Smirnov test
     ## 
-    ## data:  data_final$Besucher_wochenende1
-    ## D = 0.13046, p-value = 1.034e-13
+    ## data:  data_final$visitors_premiere_weekend
+    ## D = 0.13072, p-value = 9.259e-14
     ## alternative hypothesis: two-sided
 
 ``` r
 # Anderson-Darling-Test:
-ad.test(x = data_final$Besucher_wochenende1, null = "pgamma", 
+ad.test(x = data_final$visitors_premiere_weekend, null = "pgamma", 
         shape = fit_gamma$estimate[1], scale = fit_gamma$estimate[2])
 ```
 
     ## 
     ##  Anderson-Darling test of goodness-of-fit
     ##  Null hypothesis: Gamma distribution
-    ##  with parameters shape = 0.399973613325514, scale = 397265.905364349
+    ##  with parameters shape = 0.399473687990772, scale = 397405.332987416
     ## 
-    ## data:  data_final$Besucher_wochenende1
-    ## An = 34.643, p-value = 6.696e-07
+    ## data:  data_final$visitors_premiere_weekend
+    ## An = 34.94, p-value = 6.682e-07
 
 ``` r
 # Cramer-von Mises-Test:
-cvm.test(x = data_final$Besucher_wochenende1, null = "pgamma", 
+cvm.test(x = data_final$visitors_premiere_weekend, null = "pgamma", 
          scale = fit_gamma$estimate[1], shape = fit_gamma$estimate[2])
 ```
 
     ## 
     ##  Cramer-von Mises test of goodness-of-fit
     ##  Null hypothesis: Gamma distribution
-    ##  with parameters scale = 0.399973613325514, shape = 397265.905364349
+    ##  with parameters scale = 0.399473687990772, shape = 397405.332987416
     ## 
-    ## data:  data_final$Besucher_wochenende1
-    ## omega2 = 161.65, p-value = 0.02323
+    ## data:  data_final$visitors_premiere_weekend
+    ## omega2 = 162.09, p-value = 0.02337
 
 The Null hypothesis can be declined. Although, the p-values of all tests
 are above the p-values of the tests for normal distribution they are
@@ -224,30 +253,31 @@ Therefore, for all further descriptive analysis the logarithmic target
 feature will be used.
 
 ``` r
-# Boxpots
-par(mfrow = c(1, 2))
-boxplot(x = data_final$Besucher_wochenende1, ylab = "Visitors on the first weekend")
-boxplot(x = data_final$Besucher_wochenende1_log, ylab = "log(Visitors on the first weekend)")
+plot1 <- ggplot(aes(x = "", y = visitors_premiere_weekend), data = data_final) + geom_boxplot() +
+  labs(y = "Visitors on the first weekend", x = "") +
+  stat_con + scale_y_continuous(labels = thousand_dot)
+
+plot2 <- ggplot(aes(x = "", y = visitors_premiere_weekend_log), data = data_final) + geom_boxplot() +
+  labs(y = "log(Visitors on the first weekend)", x = "") +
+  stat_con + scale_y_continuous(labels = thousand_dot)
+
+grid.arrange(plot1, plot2, ncol = 2)
 ```
 
 ![](target_analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-
-``` r
-par(mfrow = c(1, 1))
-```
 
 Also the boxplots of the untranformed and the logarithmic target
 varaible depict a much more balanced image of the logarithmic feature
 with much less outliers than the untransformed target.
 
 ``` r
-t_mon = as.POSIXlt(data_final$Kinostart)$mon + 1
-t_y = as.POSIXlt(data_final$Kinostart)$year + 1900
-t = as.Date(paste0(t_mon, "-", t_y, "01"), format = "%m-%Y%d")
-tmp = aggregate(data_final$Besucher_wochenende1_log, by = list(t), mean)
-colnames(tmp) = c("Date", "Visitors_log")
-plot(tmp$Visitors_log ~ tmp$Date, type = "l", xaxt = "n", ylab =  "log(Visitors on the first weekend)", xlab = "Date")
-axis.Date(side = 1, at = tmp$Date, format = "%m-%Y")
+t_mon <- as.POSIXlt(data_final$premiere_date)$mon + 1
+t_y <- as.POSIXlt(data_final$premiere_date)$year + 1900
+t <- as.Date(paste0(t_mon, "-", t_y, "01"), format = "%m-%Y%d")
+tmp <- aggregate(data_final$visitors_premiere_weekend_log, by = list(t), mean)
+colnames(tmp) <- c("Date", "Visitors_log")
+ggplot(data = tmp, aes(x = Date, y = Visitors_log)) + geom_line(size = 1) + stat_con + 
+  scale_x_date(date_labels = "%m-%Y") + ylab("log(Visitors on the first weekend)")
 ```
 
 ![](target_analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
