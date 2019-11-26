@@ -127,7 +127,7 @@ calculate_google_value = function(data, weights) {
   google_values = matrix(data = NA, nrow = nrow(data), ncol = 12)
 
     for(i in 1:6) {
-    columns = head(grep(pattern = paste0("woche", i), x = colnames(data)), 3)
+    columns = head(grep(pattern = paste0("week", i), x = colnames(data)), 3)
     data_sub = data[, columns]
     weights_sub = weights[, 7 - i]
     google_values[, 7 - i] = weights_sub[1] * data_sub[, 1] + 
@@ -156,7 +156,7 @@ calculate_google_value = function(data, weights) {
     }
   }  
   google_values = as.data.frame(google_values)
-  colnames(google_values) = c(paste0("woche", 6:1), paste0("aggregation", 6:1))
+  colnames(google_values) = c(paste0("week", 6:1), paste0("aggregation", 6:1))
   return(google_values)
 }
 
@@ -245,7 +245,7 @@ optim_weights = function(data, n_outer = 3, n_inner = 10, reps_inner = 5){
 
         cors_reps = parLapply(cl, fun = cross_validate_inner, X = samples_inner, n_folds_inner = n_folds_inner,
                               data = train_set_outer, w_m = w_m[m], w_mc = w_mc[mc])
-        inner_result[m, mc] = mean(unlist(cors_reps))
+        inner_result[m, mc] = mean(unlist(cors_reps), na.rm = TRUE)
         gc()
       }
       i = i + 1

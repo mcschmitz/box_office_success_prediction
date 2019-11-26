@@ -47,17 +47,17 @@ head(main_title_film_final)
 
 
 # Add Google Trends data for search term "Kino"
-kino_data = matrix(nrow = nrow(movies), ncol = 6)
+kino_data <- matrix(nrow = nrow(movies), ncol = 6)
 for(i in seq_along(movies$forecast_date1)) {
-  end = which(as.character(enddates[i]) == gt_kino[,1])
-  start = end - 5
-  kino_data[i, ] = as.integer(gt_kino$hits[start:end])
+  end <- which(as.character(enddates[i]) == gt_kino[,1])
+  start <- end - 5
+  kino_data[i, ] <- as.integer(gt_kino$hits[start:end])
 }
-kino_data = as.data.frame(kino_data)
-colnames(kino_data) = c(paste0("week", 6:1, "_kino"))
+kino_data <- as.data.frame(kino_data)
+colnames(kino_data) <- c(paste0("week", 6:1, "_kino"))
 
 # Concatenate data
-data_final = cbind(movies, main_title_final[, -1], complete_title_final[, -1], main_title_film_final[, -1], kino_data)
+data_final <- cbind(movies, main_title_final[, -1], complete_title_final[, -1], main_title_film_final[, -1], kino_data)
 
 rm(list = ls()[which(!(ls() %in% c("data_final")))])
 save.image("data/concatenated_data.RData")
