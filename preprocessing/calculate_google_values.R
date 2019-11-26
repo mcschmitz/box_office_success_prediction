@@ -85,6 +85,17 @@ for(i in 1:ncol(google_values)) {
 colnames(google_values) <- paste0(colnames(google_values), "_transformiert")
 test <- cbind(test, google_values)
 
+# Apply boxcox trafo complete data test
+google_values <- calculate_google_value(data = data_final, weights = weights)
+data_final <- cbind(data_final, google_values)
+google_values <- data_final[, columns]
+for(i in 1:ncol(google_values)) {
+  boxcox <- calculate_box_cox(google_values[, i], lambda[, i])
+  google_values[, i] <- boxcox
+}
+colnames(google_values) <- paste0(colnames(google_values), "_transformiert")
+data_final <- cbind(data_final, google_values)
+
 # save final workspace
 rm(list = ls()[which(!(ls() %in% c("data_final", "train", "test", "lambda", "weights")))])
 save.image("data/data_final.RData")
