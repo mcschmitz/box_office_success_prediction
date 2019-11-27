@@ -2,6 +2,8 @@ require(docstring)
 require(matrixStats)
 require(parallel)
 require(geoR)
+require(mlrMBO)
+require(purrr)
 
 forecast_date = function(date, forecast) {
   #' Function to calculcate the end date of the forecast
@@ -203,7 +205,7 @@ calculate_box_cox = function(google_bucket, lambda) {
   return(trafo)
 }
 
-optim_weights = function(data, n_outer = 3, n_inner = 10, reps_inner = 5){
+optim_weights = function(data, n_outer = 3, n_inner = 10){
   #' Function to optimize weights via nested resampling
   #' 
   #' @param data [data.frame]
@@ -214,69 +216,59 @@ optim_weights = function(data, n_outer = 3, n_inner = 10, reps_inner = 5){
   #' @return best_params [numeric]: best weight combination
   #' @return correlations [numeric]: correlations of the single CV folds
 
-  w_m = seq(0.01, 0.99, by = 0.01)
-  w_mc = seq(0.01, 0.99, by = 0.01)
-  i = 0
   n_folds_outer = n_outer
   n_folds_inner = n_inner
-  n_reps_inner = reps_inner
   best_params = list()
   lambda = list()
   correlations = c()
 
-  folds_outer = sample(rep(1:n_folds_outer, length.out = nrow(data)))
-  n_cores = min(reps_inner, (detectCores() - 1))
+  folds_outer <- cut(seq(1,nrow(data)), breaks = n_outer, labels = FALSE)
 
-  for(outer_fold in 1:n_folds_outer) {
-    train_set_outer = data[which(folds_outer != outer_fold), ]
-    test_set_outer = data[which(folds_outer == outer_fold), ]
-    inner_result = matrix(nrow = length(w_mc), ncol = length(w_m))
-    samples_inner = replicate(n = n_reps_inner, expr = {
-      sample(rep(1:n_folds_inner, length.out = nrow(train_set_outer)))},
-      simplify = FALSE)
-    pb = txtProgressBar(min = 0, max = n_outer * length(w_m), style = 3)
-    cl = makePSOCKcluster(n_cores)
+  for(fold in 1:n_folds_outer) {
+    testIndexes <- which(folds_outer == fold,arr.ind = TRUE)
+    train = data[-testIndexes, ]
+    test = data[testIndexes, ]
+    
+    f = partial(cross_validate_inner, data = train, n_inner = n_folds_inner)
+    obj.fun = makeSingleObjectiveFunction(
+      name = "corr_optimization",
+      fn = f,
+      par.set = makeParamSet(
+        makeNumericParam("main_title_weight", lower = 0, upper = 1),
+        makeNumericParam("complete_title_weight", lower = 0, upper = 1)
+      ),
+      minimize = FALSE
+    )
+    des = generateDesign(n = 8, par.set = getParamSet(obj.fun), fun = lhs::randomLHS)
+    des$y = apply(des, 1, obj.fun)
+    surr.km = makeLearner("regr.km", predict.type = "se", covtype = "matern3_2", control = list(trace = FALSE))
+    control = makeMBOControl()
+    control = setMBOControlTermination(control, iters = 80)
+    control = setMBOControlInfill(control, crit = makeMBOInfillCritEI())
+    run = mbo(obj.fun, design = des, learner = surr.km, control = control, show.info = FALSE)
+    best_m = run$x$main_title_weight
+    best_mc = run$x$complete_title_weight
 
-    for(m in 1:length(w_m)) {
-      for(mc in 1:length(w_mc)) {
-        clusterExport(cl, varlist = list("cross_validate_inner", "n_folds_inner", "train_set_outer", "m", "mc",
-                                         "estimate_box_cox", "boxcoxfit", "calculate_box_cox"),
-                      envir = environment())
-
-        cors_reps = parLapply(cl, fun = cross_validate_inner, X = samples_inner, n_folds_inner = n_folds_inner,
-                              data = train_set_outer, w_m = w_m[m], w_mc = w_mc[mc])
-        inner_result[m, mc] = mean(unlist(cors_reps), na.rm = TRUE)
-        gc()
-      }
-      i = i + 1
-      setTxtProgressBar(pb, i)
-    }
-    stopCluster(cl)
-    gc()
-
-    best_params[[outer_fold]] = which(inner_result == max(inner_result), arr.ind = TRUE)
-    best_m = best_params[[outer_fold]][1]
-    best_mc = best_params[[outer_fold]][2]
-
-    bucket_m = w_m[best_m] * train_set_outer[, 2] + (1-w_m[best_m]) * train_set_outer[, 3]
-    bucket = ifelse(train_set_outer[, 5] == 1, 
-                    w_mc[best_mc] * bucket_m + (1 - w_mc[best_mc]) * train_set_outer[, 4],
+    bucket_m = best_m * train[, 2] + (1-best_m) * train[, 3]
+    bucket = ifelse(train[, 5] == 1, 
+                    best_mc * bucket_m + (1 - best_mc) * train[, 4],
                     bucket_m)
     trafo_result = estimate_box_cox(bucket)
-    lambda[outer_fold] = trafo_result$lambda
+    lambda$fold = trafo_result$lambda
     
-    t_bucket_m_outer = w_m[best_m] * test_set_outer[, 2] + (1-w_m[best_m]) * test_set_outer[, 3]
-    t_bucket_outer = ifelse(test_set_outer[, 5] == 1, 
-                            w_mc[best_mc] * t_bucket_m_outer + (1 - w_mc[best_mc]) * test_set_outer[, 4],
+    t_bucket_m_outer = best_m * test[, 2] + (1-best_m) * test[, 3]
+    t_bucket_outer = ifelse(test[, 5] == 1, 
+                            best_mc * t_bucket_m_outer + (1 - best_mc) * test[, 4],
                             t_bucket_m_outer)
     t_bucket_outer_trafo = calculate_box_cox(t_bucket_outer, trafo_result$lambda)
-    correlations[outer_fold] = cor(t_bucket_outer_trafo, test_set_outer[, 1])
+    correlations[fold] = cor(t_bucket_outer_trafo, test[, 1])
+    best_params[[fold]] = c(best_m, best_mc)
   }
   return(list(best_params, correlations))
 }
 
-# Funktion zur Durchfuerhrung der inneren CV Schleife
-cross_validate_inner = function(data, sample, n_folds_inner, w_m, w_mc) {
+
+cross_validate_inner = function(data, x, n_inner) {
   #' Utility function to apply inner CV Loop
   #' 
   #' @param data [data.frame]: dataset
@@ -287,30 +279,29 @@ cross_validate_inner = function(data, sample, n_folds_inner, w_m, w_mc) {
   #' 
   #' @return [numeric]: mean of correlations on the test datasets of the CV
 
-  folds_inner = sample
-  mean_corrs_inner = c()
-  correlations_inner = c()
-
-  for(inner_fold in 1:n_folds_inner) {
-    train_set_inner = data[which(folds_inner != inner_fold), ]
-    test_set_inner = data[which(folds_inner == inner_fold), ]
-
-    bucket_m_inner = w_m * train_set_inner[, 2] + (1-w_m) * train_set_inner[, 3]
-    bucket_inner = ifelse(train_set_inner[, 5] == 1, 
-                          w_mc * bucket_m_inner + (1 - w_mc) * train_set_inner[, 4],
+  w_m = x[1]
+  w_mc = x[2]
+  avg_correlations = c()
+  folds <- cut(seq(1,nrow(data)), breaks = n_inner, labels = FALSE)
+  for (i in 1:n_inner){
+    testIndexes <- which(folds == i,arr.ind = TRUE)
+    train <- data[-testIndexes, ]
+    test <- data[testIndexes, ]
+    
+    bucket_m_inner = w_m * train[, 2] + (1-w_m) * train[, 3]
+    bucket_inner = ifelse(train[, 5] == 1, 
+                          w_mc * bucket_m_inner + (1 - w_mc) * train[, 4],
                           bucket_m_inner)
     trafo_result_inner = estimate_box_cox(bucket_inner)
     
-    t_bucket_m_inner = w_m * test_set_inner[, 2] + (1-w_m) * test_set_inner[, 3]
-    t_bucket_inner = ifelse(test_set_inner[, 5] == 1, 
-                            w_mc * t_bucket_m_inner + (1 - w_mc) * test_set_inner[, 4],
+    t_bucket_m_inner = w_m * test[, 2] + (1-w_m) * test[, 3]
+    t_bucket_inner = ifelse(test[, 5] == 1, 
+                            w_mc * t_bucket_m_inner + (1 - w_mc) * test[, 4],
                             t_bucket_m_inner)
     t_bucket_inner_trafo = calculate_box_cox(t_bucket_inner, trafo_result_inner$lambda)
-
-    correlations_inner = append(correlations_inner, values = cor(t_bucket_inner_trafo, test_set_inner[, 1]))
+    avg_correlations[i] = cor(t_bucket_inner_trafo, test[, 1])
   }
-  mean_corrs_inner = mean(correlations_inner)
-  return(mean_corrs_inner)
+  return(mean(avg_correlations, na.rm=TRUE))
 }
 
 

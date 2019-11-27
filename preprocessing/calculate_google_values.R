@@ -1,5 +1,5 @@
-source("utils/preprocessing_utils.R")
 load("data/concatenated_data.RData")
+source("utils/preprocessing_utils.R")
 
 # training sample
 train_size <- floor(0.75 * nrow(data_final))
@@ -17,21 +17,21 @@ for (horizon in 1:6){
               "secondary_title")
   data_sub <- train[, columns]
   cat("Calculation for week", horizon, "with params:", paste0(colnames(data_sub), collapse = ", "), "\n")
-  values <- optim_weights(data = data_sub, n_outer = 3, n_inner = 10, reps_inner = 5)
+  values <- optim_weights(data = data_sub, n_outer = 10, n_inner = 10)
   assign(paste0("weights", horizon), values)
   gc()
   save.image("results/parameters/weights.Rdata")
 }
 
 # Calculate weights for aggregated data
-for (horizon in 2:6){
+for (horizon in 1:6){
   set.seed(horizon)
   columns <- c("visitors_premiere_weekend_log", paste0("aggregation", horizon, "_main_title"),
               paste0("aggregation", horizon, "_main_title_film"), paste0("aggregation", horizon, "_complete_title"),
               "secondary_title")
   data_sub <- train[, columns]
   cat("Calculation for week", horizon, "with params:", paste0(colnames(data_sub), collapse = ","), "\n")
-  values <- optim_weights(data = data_sub, n_outer = 3, n_inner = 10, reps_inner = 5)
+  values <- optim_weights(data = data_sub, n_outer = 10, n_inner = 10)
   assign(paste0("weights_agg",horizon), values)
   gc()
   save.image("results/parameters/weights.Rdata")
@@ -41,16 +41,15 @@ for (horizon in 2:6){
 weights <- matrix(ncol = 12, nrow = 2)
 for(i in 1:6){
   current_weights <- unlist(get(paste0("weights", i))[[1]])
-  weights[1, 7 - i] <- mean(current_weights[c(1, 3, 5)])
-  weights[2, 7 - i] <- mean(current_weights[c(2, 4, 6)])
+  weights[1, 7 - i] <- mean(current_weights[seq(1, length(current_weights), 2)])
+  weights[2, 7 - i] <- mean(current_weights[1 + seq(1, length(current_weights), 2)])
   
   current_weights <- unlist(get(paste0("weights_agg", i))[[1]])
-  weights[1, 13 - i] <- mean(current_weights[c(1, 3, 5)])
-  weights[2, 13 - i] <- mean(current_weights[c(2, 4, 6)])
+  weights[1, 13 - i] <- mean(current_weights[seq(1, length(current_weights), 2)])
+  weights[2, 13 - i] <- mean(current_weights[1 + seq(1, length(current_weights), 2)])
 }
 rownames(weights) <- c("weights_main_title_film", "weights_complete_title")
 colnames(weights) <- c(paste0("week", 6:1), paste0("aggregation", 6:1))
-(weights <- weights/99)
 
 save.image("results/parameters/weights.Rdata")
 

@@ -6,39 +6,41 @@ most critical features of a movie***
 
 ``` r
 require(MASS)
+require(ggridges)
 require(goftest)
 
-load("../data/data_final/data_final.RData")
+load("../data/data_final.RData")
+source("../utils/plotting_utils.R")
 ```
 
 ``` r
-plot(x = data_final$Kopien, y = data_final$Besucher_wochenende1_log,
-     main = "Relation between number off copies and visistors on the first weekend", xlab = "#Copies", 
-     ylab = "log(Visitors on the first weekend)")
+ggplot(data = data_final, mapping = aes(x = copies, y = visitors_premiere_weekend_log)) + geom_point() + 
+  labs(x = "#Copies", y = "log(Visitors on the first weekend)") + stat_con
 ```
 
 ![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 The upper plot shows a clear relation between number of copies and the
-target feature. Obviously, this relation is not linear which should be
-taken into account if one includes this feature into her model.
+target feature. The number of copies usually reffers to the number of
+cinemas in which the movie is shown. Obviously, this relation is not
+linear which should be taken into account if one includes this feature
+into her model.
 
 ``` r
-plot(x = data_final$Kinderfilm, y = data_final$Besucher_wochenende1_log,
-     main = "Relation between the movie beeing a kids movie and visistors", 
-     ylab = "log(Visitors on the first weekend)", xlab = "Kids Movie",  names = c("Yes", "No"))
+ggplot(data = data_final, mapping = aes(x = kids_movie, y = visitors_premiere_weekend_log, fill = kids_movie)) +
+  geom_boxplot() + labs(x = "Kids Movie", y = "log(Visitors on the first weekend)") + stat_con + 
+  scale_x_discrete(labels = c("Yes", "No")) + theme(legend.position = "none")
 ```
 
 ![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-Also there seems to be a relation between the movie beeing a Kids Movie
+Also, there seems to be a relation between the movie beeing a Kids Movie
 or not. Whereby, Kids Movies usually attract less visitors that Non Kids
 Movies.
 
 ``` r
-par(mar = c(5, 10, 4, 2))
-plot(x = data_final$Genre_Prognose, y = data_final$Besucher_wochenende1_log, horizontal=TRUE, las=2,
-     main = "Relation between genre and visistors", xlab = "log(Visitors on the first weekend)", ylab = "")
+ggplot(data = data_final, mapping = aes(x = genre, y = visitors_premiere_weekend_log, fill = genre)) + geom_boxplot() +
+  labs(x = "Genre", y = "log(Visitors on the first weekend)") + stat_con + theme(legend.position = "none")
 ```
 
 ![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
@@ -54,12 +56,76 @@ outliers in the tranformed target.
 The plot below shows the relation between the category of the stuio and
 the target feature. Unsurprisingly bigger studios tent to release movies
 which attract a greater amount of visitors than the smaller independent
-studios.
+studios. Especially the movies released by small independent studios
+rarely attract more than 800000 people. The medians of the visitors at
+the premiere weekend are log(9.29) = 10829 for independen studios,
+log(10.1) = 24343 for major independent studios and log(11.3) = 80821
+for major studios. This obviously seems to have a high impact on the
+amount of people watching a movie.
 
 ``` r
-plot(x = data_final$Verleiherkategorie, y = data_final$Besucher_wochenende1_log,
-     main = "Relation between studio category and visistors",
-     ylab = "log(Visitors on the first weekend)", xlab = "Studio category")
+data_final$studio <- factor(data_final$studio, levels=names(sort(table(data_final$studio), decreasing=FALSE)))
+
+plot1 <- ggplot(data = data_final, mapping = aes(x = studio, y = visitors_premiere_weekend_log, fill = studio)) + 
+  stat_boxplot(geom = "errorbar", width = .25) + geom_boxplot() +
+        labs(x = "Studio category", y = "log(Visitors on the first weekend)") + stat_con + 
+        scale_x_discrete(labels = c("Independent", "Major Ind.", "Major")) + theme(legend.position = "none") 
+
+plot2 <- ggplot(aes(x = visitors_premiere_weekend_log, fill = studio), data = data_final) + 
+  geom_density(alpha = .4) + labs(x = "log(Visitors on the first weekend)", y = "KDE") + stat_con + 
+  theme(legend.position = c(0.25, 0.85), legend.background=element_rect(fill="transparent",colour=NA),
+        legend.key=element_rect(fill="transparent",colour=NA)) +
+        scale_fill_discrete("Studio category", labels = c("Independent", "Major Ind.", "Major"))
+
+grid.arrange(plot1, plot2, ncol = 2)
 ```
 
 ![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+If it comes to seasonal impact a difference between summer and winter is
+the first thing that comes to mind.
+
+``` r
+plot1 <- ggplot(data = data_final, mapping = aes(x = season, y = visitors_premiere_weekend_log, fill = season)) + 
+  stat_boxplot(geom = "errorbar", width = .25) + geom_boxplot() + 
+  labs(x = "Season", y = "log(Visitors on the first weekend)") + stat_con + theme(legend.position = "none")
+
+plot2 <- ggplot(aes(x = visitors_premiere_weekend_log, fill = season), data = data_final) + 
+  geom_density(alpha = .4) + labs(x = "log(Visitors on the first weekend)", y = "KDE") + stat_con + 
+  theme(legend.position = c(0.15, 0.9)) + scale_fill_discrete("Season")
+
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+The plot confirms this assumption. The median of the visitors of a movie
+at its premiere weekend of movies released during summer is log(10.1) =
+24343, whereby on the other hand this value of movies released during
+winter months is log(10.6) = 40134 which is almost twice as high.
+Looking at the tails of the distribution one sees that especially the
+marginal distsribbution of movies released during summer is heavier
+tailed on the left side compared to the density of movies released
+during winter. Obviously the seasonal influence affects smaller movies
+more than it affects blockbusters.
+
+``` r
+ggplot(data = data_final, aes(y = season)) + geom_density_ridges(aes(x = visitors_premiere_weekend_log, fill=studio),
+                      alpha = .8, color = "black") + labs(x = "log(Visitors on the first weekend)", y = "") + 
+  scale_fill_discrete("Studio category", labels=c("Independent", "Major", "Major Independent")) + 
+  scale_y_discrete("", labels=c("Winter", "Summer")) + stat_con + theme(axis.line.y = element_blank())
+```
+
+![](movie_feature_analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+Plotting the target in dependency of studio and the season in a combined
+plot the conclusion made above is confirmed. While the overall density
+of moviegoers during summer seems to have a higher mass on lower
+numbers, the discrepancy of the success of movies released by independet
+and major studios is greater during the winter months. Interestingly
+enough there appears to be a bunch of unsuccesfull movies realeased by
+major studios during summer, which is shown in the smaller peak of the
+density of movies released by major studios during summer. Obviously
+major studios shoudl release their movies during the winter months,
+while independent studios should release them during the summer months
+if they want them to be succesfull.
