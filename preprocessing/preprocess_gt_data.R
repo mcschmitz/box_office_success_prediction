@@ -45,7 +45,6 @@ colnames(main_title_film_final) <- c("title", paste0("week", 6:1, "_main_title_f
                                     paste0("aggregation", 6:1, "_main_title_film"))
 head(main_title_film_final)
 
-
 # Add Google Trends data for search term "Kino"
 kino_data <- matrix(nrow = nrow(movies), ncol = 6)
 for(i in seq_along(movies$forecast_date1)) {

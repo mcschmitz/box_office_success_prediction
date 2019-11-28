@@ -1,7 +1,6 @@
 ---
 title: "Movie Feature Analyis"
 output: rmarkdown::github_document
-always_allow_html: true
 ---
 
 ```{r set-options, echo = FALSE, cache = FALSE}

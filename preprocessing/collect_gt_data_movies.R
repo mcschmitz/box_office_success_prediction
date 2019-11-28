@@ -108,7 +108,7 @@ for (i in 1:length(ankers)){
 }
 
 # Scale down search terms
-x = scale_down(upper_gt <- gt_data1, lower_gt = gt_data1, scale_gt = gt_anker1_median)
+x <- scale_down(upper_gt = gt_data1, lower_gt = gt_data1, scale_gt = gt_anker1_median)
 for (i in 2:length(ankers)){
   x <- scale_down(upper_gt = x, lower_gt = get(paste0("gt_data", i)), scale_gt = get(paste0("gt_anker1_anker", i)))
 }
@@ -116,13 +116,15 @@ for (i in 2:length(ankers)){
 # Build final Google Trends dataset
 gt_data_complete_title <- x
 gt_data_complete_title <- as.data.frame(t(gt_data_complete_title[,4:ncol(gt_data_complete_title)]))
-colnames(gt_data_complete_title) <- gt_data1[, 2]
 rownames(gt_data_complete_title) <- 1:nrow(gt_data_complete_title)
-gt_data_complete_title <- cbind("title" = complete_title[which(main_title != complete_title)], gt_data_complete_title)
-load("data/gt_data_main_title.RData")
-gt_data_complete_title = rbind(gt_data_main_title[which(complete_title == main_title), ], gt_data_complete_title)
+gt_data_complete_title <- cbind("title" = movies$title[which(main_title != complete_title)], gt_data_complete_title)
 
-head(gt_data_complete_title)
+load("data/gt_data_main_title.RData")
+colnames(gt_data_complete_title) <- colnames(gt_data_main_title)
+gt_data_complete_title = rbind(gt_data_main_title[which(complete_title == main_title), ], gt_data_complete_title)
+gt_data_complete_title = gt_data_complete_title[order(match(gt_data_complete_title[, 1], gt_data_main_title$title)), ]
+rownames(gt_data_complete_title) = 1:nrow(gt_data_complete_title)
+
 rm(list = ls() [which(ls() != "gt_data_complete_title")])
 save.image("data/gt_data_complete_title.RData")
 

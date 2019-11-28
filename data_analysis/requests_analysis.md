@@ -5,8 +5,7 @@ Requests Analyis
 Google requests of the movie title***
 
 ``` r
-load("../data/data_final/data_final.RData")
-
+load("../data/data_final.RData")
 source("../utils/preprocessing_utils.R")
 source("../utils/plotting_utils.R")
 ```
@@ -14,18 +13,18 @@ source("../utils/plotting_utils.R")
 Data extraction:
 
 ``` r
-target = data_final$Besucher_wochenende1
-target_log = data_final$Besucher_wochenende1_log
-google_value = data_final[, paste0("Woche", 6:1)]
-aggregation_google_value = data_final[, paste0("Aggregation", 6:1)]
-google_value_transformed = data_final[, paste0("Woche", 6:1, "_transformiert")]
-aggregation_google_value_transformed = data_final[, paste0("Aggregation", 6:1, "_transformiert")]
-main_title = data_final[, paste0("Woche", 6:1, "_haupttitel")]
-main_title_film = data_final[, paste0("Woche", 6:1, "_haupttitel_film")]
-aggregation_main_title_film = data_final[, paste0("Aggregation", 6:1, "_haupttitel_film")]
-aggregation_main_title = data_final[, paste0("Aggregation", 6:1, "_haupttitel")]
-complete_title = data_final[paste0("Woche", 6:1, "_gesamttitel")]
-aggregation_complete_title = data_final[, paste0("Aggregation", 6:1, "_gesamttitel")]
+target = data_final$visitors_premiere_weekend
+target_log = data_final$visitors_premiere_weekend_log
+google_value = data_final[, paste0("week", 6:1)]
+aggregation_google_value = data_final[, paste0("aggregation", 6:1)]
+google_value_transformed = data_final[, paste0("week", 6:1, "_transformiert")]
+aggregation_google_value_transformed = data_final[, paste0("aggregation", 6:1, "_transformiert")]
+main_title = data_final[, paste0("week", 6:1, "_main_title")]
+main_title_film = data_final[, paste0("week", 6:1, "_main_title_film")]
+aggregation_main_title_film = data_final[, paste0("aggregation", 6:1, "_main_title_film")]
+aggregation_main_title = data_final[, paste0("aggregation", 6:1, "_main_title")]
+complete_title = data_final[, paste0("week", 6:1, "_complete_title")]
+aggregation_complete_title = data_final[, paste0("aggregation", 6:1, "_complete_title")]
 ```
 
 Let’s take a look at the devolpment of the calculated Google Value from
@@ -36,33 +35,25 @@ the start of the time series (6 weeks prior to premiere) until its end
 requests = t(google_value)
 colnames(requests) = data_final$Filmtitel
 alpha_var = rep(x = target, each = 6)
-p1 = plot_requests(requests, y = "weekly requests (Google Value)", alpha = alpha_var, names = c("Date", "Movie", "Req"))
-requests = t(aggregation_google_value)
-colnames(requests) = data_final$Filmtitel
-p2 = plot_requests(requests, y = "weekly agg. requests (Google Value)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-grid.arrange(p1, p2, ncol=2)
+plot_requests(requests, y = "Google Value", alpha = alpha_var, names = c("Date", "Movie", "Req"))
 ```
 
 ![](requests_analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 The weekly values of the Google Value tend to increase until the
-premiere. This of course results in a clear picture of the aggregation
-of the values. Also it seems like the increase correlates with the
-number of visitors, whereas terms of more popular movies tend to
-increase steeper than unpopular ones.
+premiere. The darker the color of a line, the more people eventually
+watched the movie. The black line depics the average of the Google
+Values of all movies. It can be easily seen that the calculated Google
+Values increases towards premiere. The highest increase is 2 weeks
+before premiere. The line dominating each other ith a gogle Vale far abe
+0.025 is *Star Wars* which has a steadily high request rate due to its
+ambiguity.
 
 ``` r
 requests = t(complete_title)
-colnames(requests) = data_final$Filmtitel
+colnames(requests) = complete_title$title
 alpha_var = rep(x = target, each = 6)
-p1 = plot_requests(requests, y = "weekly requests (Complete title)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-requests = t(aggregation_complete_title)
-colnames(requests) = data_final$Filmtitel
-p2 = plot_requests(requests, y = "weekly agg. requests (Complete title)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-grid.arrange(p1, p2, ncol=2)
+plot_requests(requests, y = "weekly requests (Complete title)", alpha = alpha_var, names = c("Date", "Movie", "Req"))
 ```
 
 ![](requests_analysis_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
@@ -72,45 +63,35 @@ complete title of the movies. Whereby, some complete titles tend to
 stagnate about 4 weeks before their premiere. One assumption - which
 will be later confirmed by the models - is, that as soon as a search
 termn gathers momentum at Google Search it is not necessary anymore to
-search for the full title but for just the main title. The time of
+search for the full title but just for the main title. The time of
 momentum gatherin seems to be around 4 to 3 weeks of a movies premiere.
 
 ``` r
 requests = t(main_title)
 colnames(requests) = data_final$Filmtitel
 alpha_var = rep(x = target, each = 6)
-p1 = plot_requests(requests, y = "weekly requests (Main title)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-requests = t(aggregation_main_title)
-colnames(requests) = data_final$Filmtitel
-p2 = plot_requests(requests, y = "weekly agg. requests (Main title)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-grid.arrange(p1, p2, ncol=2)
+plot_requests(requests, y = "weekly requests (Main title)", alpha = alpha_var,names = c("Date", "Movie", "Req"))
 ```
 
 ![](requests_analysis_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 Taking a look at the main title shows a very similar image to the
-overall Google Value. If one takes a look at the numbers of the search
-time main title with the sufffix “film” she will notice, that
-blockbusters to not have high numbers for requests with this suffix.
-This might be due to the fact, that it’s simply not necessary to add
-this suffix to search requests on very populat movies. It is simply not
-necessary to add “film” to a search request “Mission Impossible”,
-whereas if the movie has become a brand like Star Wars or Lord of the
-Rings it might become necessary again.
+overall Google Value.
+
+If one takes a look at the numbers of the search term main title with
+the suffix “film” she will notice, that blockbusters to not have high
+numbers for requests with this suffix. This might be due to the fact,
+that it’s simply not necessary to add this suffix to search requests on
+very populat movies. It is simply not necessary to add “film” to a
+search request “Mission Impossible”, whereas if the movie has become a
+brand like Star Wars or Lord of the Rings it might become necessary
+again.
 
 ``` r
 requests = t(main_title)
 colnames(requests) = data_final$Filmtitel
 alpha_var = rep(x = target, each = 6)
-p1 = plot_requests(requests, y = "weekly requests (Main title + film)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-requests = t(aggregation_main_title_film)
-colnames(requests) = data_final$Filmtitel
-p2 = plot_requests(requests, y = "weekly agg. requests (Main title + film)", alpha = alpha_var, 
-                   names = c("Date", "Movie", "Req"))
-grid.arrange(p1, p2, ncol=2)
+plot_requests(requests, y = "weekly requests (Main title + film)", alpha = alpha_var, names = c("Date", "Movie", "Req"))
 ```
 
 ![](requests_analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
@@ -164,13 +145,13 @@ grid.arrange(p1, p2, ncol=2)
 ![](requests_analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 There does not seem to be any obvious difference between the KPIs and
-their cummulative aggregation, except for the search term “main title +
-film” whose correlation increases during the timewindow. Nevertheless,
-the Google Value, the complete title and the main title show a high
-correlation between compared to the number of visitors. Also notice: 6
-and 5 weeks before premiere the correlation between the complete title
-and the number of visitors is greater than the correlation between the
-main title and the number of visitors, which kind of confirms the
-assumption made above, that up to 4 week prior to premier it is
-neceassary to google for the complete title and not just the main title
-if one wants to find sufficient results.
+their cummulative aggregation, except for the aggregated volume of the
+search term “main title + film” whose correlation stagnates at about 3
+weeks before premiere. Nevertheless, the Google Value, the complete
+title and the main title show a high correlation between compared to the
+number of visitors. Also notice: 6 and 5 weeks before premiere the
+correlation between the complete title and the number of visitors is
+greater than the correlation between the main title and the number of
+visitors, which kind of confirms the assumption made above, that up to 4
+week prior to premier it is neceassary to google for the complete title
+and not just the main title if one wants to find sufficient results.

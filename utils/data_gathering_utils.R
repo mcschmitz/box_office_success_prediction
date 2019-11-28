@@ -32,7 +32,7 @@ export_gt_data <- function(terms, startdates, enddates = NULL, geo = "DE", anker
   
   # Split termms in chunks
   terms <- terms[nchar(terms) > 0]
-  terms <- gsub(x <- terms, pattern = ",", "")
+  terms <- gsub(x = terms, pattern = ",", "")
   nchunks <- ceiling(length(terms)/4)
   split_factor <- rep(1:nchunks, each = 4)
   split_factor <- split_factor[1:length(terms)]
