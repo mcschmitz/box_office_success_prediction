@@ -44,7 +44,7 @@ For step 1. it is mandatory to define a list of anchor terms whose search volume
 To link each search term to the median of the first anchor it is necessary to link the anchors top down. For this pupose one calculates the *Scaling Factor* as quotient of the search volumina of one anchor and the next lower anchor term. The general formula for the scaling factor is given by:
 
 <p align="center">
-<img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_i=SF_{i-1}\cdot&space;anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)}&space;\hspace{1cm}\quad\forall&space;i>2" title="SF_i=SF_{i-1}\cdot anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)} \hspace{1cm}\quad\forall i>2" />
+<img src="https://latex.codecogs.com/svg.latex?\inline&space;SF_i=SF_{i-1}\cdot&space;anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)}&space;\hspace{1cm}\quad\forall&space;i>1" title="SF_i=SF_{i-1}\cdot anchor_{i-1}^i=\frac{\prod_{j=0}^{i-2}anchor_{i-j-1}^{i-j}}{med(anchor^1)} \hspace{1cm}\quad\forall i>1" />
 </p>
 
 To make movies like *Star Wars - the force awakens* and *Flores Raras* comparable the search terms are drawn and linked to the anchor words top down. So in a first step the search terms are drawn with first anchor and scaled with its Scaling Factor. If the maximum scaled seach volume of a search term within the time window of interest is below 25% of the scaled anchor it has to be redrawn with the next lower anchor term.
