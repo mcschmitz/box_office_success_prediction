@@ -14,7 +14,7 @@ premiere and 70% one day before premiere which shall be the baseline for this re
 ### Data gathering, -preprocessing and descriptive analysis
 The provided dataset contains key data for about 900 movies that premiered in Germany between 01/03/2013 and 07/07/2016. It contains 100 features of the movies like age rating, genre, studio as well as the number of ordered copies which is referring to the number of cinemas in which a movie is presented and the number of visitors of the movies on the first weekend. The number of visitors is the target which will be forecasted.
 
-After preprocessing of the raw movie data is done in [this script](preprocessing/preprocess_movies_data.R) the Google Trends data will be collected and preprocessed. I recommend reading more on how we preprocessed the data in [this article]().
+After preprocessing of the raw movie data is done in [this script](preprocessing/preprocess_movies_data.R) the Google Trends data will be collected and preprocessed. I recommend reading more on how we preprocessed the data in [this article](https://towardsdatascience.com/using-google-trends-data-to-leverage-your-predictive-model-a56635355e3d).
 
 The order how to run the scripts to gather and preprocess the Google Trends data is
 
