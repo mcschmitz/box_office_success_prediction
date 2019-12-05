@@ -14,3 +14,12 @@ README.html
 
 # Results
 results/*
+
+# Readme
+readme_utils/*
+readme_plots/*
+!readme_plots/anchors.jpeg
+!readme_plots/median_normalization.jpeg
+!readme_plots/trends_example.jpeg
+!readme_plots/trends_example_scaled.jpeg
+!readme_plots/trends_example_scaled-median.jpeg
