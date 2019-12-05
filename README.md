@@ -18,7 +18,7 @@ After preprocessing of the raw movie data is done in [this script](preprocessing
 
 The order how to run the scripts to gather and preprocess the Google Trends data is
 
-1. Collecting the Google Trends data for the anchor terms running [this script](preprocessing/collect_gt_anchors.R)
+1. Collecting the Google Trends data for the anchor terms running [this script](preprocessing/collect_gt_data_anchors.R)
 2. Collecting and scaling the Google Trends data for the defined search terms running [this script](preprocessing/collect_gt_data_search_terms.R)
 3. Substracting the median of the time series running [this script](preprocessing/preprocess_gt_data.R)
 
